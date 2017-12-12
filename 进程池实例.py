@@ -3,6 +3,9 @@ import multiprocessing
 from multiprocessing import Pool
 import time
 
+#这里设置一个变量，用来模拟假如每一个进程每下载好一次图片，就登记一下，然后累计。
+downloadTime = 0
+
 def testPrint(xx):
     time.sleep(2)
     print(xx)
@@ -11,8 +14,12 @@ def testPrint(xx):
 class plan:
             
     def engine(self):
+        
+        #请勿在运行多进程的函数里面操作前面已经有的全局变量，一操作的话，这个函数感觉就不会运行了。
+        # downloadTime += 1
         time.sleep(2)
         print("I am engine!" )
+        #print(downloadTime)
         
     def testInstance(self):
         
@@ -62,6 +69,11 @@ if __name__ == "__main__":
     for x in range(10):
             pool3.apply_async(callInstanceMethod,)
     pool3.close()
+    
+    
+    #下面这个join，假如不加入join的话，下面的print（“就会首先运行了，因为这个就是多进程的概念，自己管自己。”）
+    #pool3.join()
+    #print("run me ???")
     
     
 #pool = Pool(2)
