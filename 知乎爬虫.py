@@ -6,7 +6,7 @@ class spider:
     
     def zhihuSpider(self):
     #设置要访问的url地址
-        url = "http://tieba.baidu.com"
+        url = "http://www.zhihu.com"
         zhihuRequest = urllib2.Request(url=url,headers=self.UA)
         
         #顶，这里有一个注意事项，那就是，urllib2需要使用相同版本，2版本，
