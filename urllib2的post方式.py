@@ -1,3 +1,8 @@
+import urllib,urllib2
+from lxml import etree
+from gzip import GzipFile
+from StringIO import StringIO
+
 class fanyi:
     
     #url = "http://192.168.113.12/test.php?xx=cc"
@@ -42,12 +47,12 @@ class fanyi:
         
         response = urllib2.urlopen(request,timeout=3).read()
         
-        print(response)
-        print(response.decode("gb2312"))
-        print(dir(response))
-        
-        print(type(response))
-        
+        print(gzip(response))
+        ##解压gzip内容
+def gzip(data):
+        buf = StringIO(data)
+        f = GzipFile(fileobj=buf)
+        return f.read()
         
 ##调用类和方法
 test = fanyi()
