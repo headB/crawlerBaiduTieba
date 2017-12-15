@@ -31,9 +31,10 @@ class fanyi:
         self.thisTime = int(time.time())*1000
         #把所有参数相加，准备md5
         str1 = cryptKey2+self.queryWord+str(self.thisTime)+cryptKey1
-        md5Tool = md5()
-        md5Tool.update(str1)
-        self.cryptStr = md5Tool.hexdigest()
+        #md5Tool = md5()
+        #md5Tool.update(str1)
+        #self.cryptStr = md5Tool.hexdigest()
+        self.cryptStr = md5(str1).hexdigest()
         ##把所有的post值都设置在一个字典里面
         self.post_json = {  
             "i":self.queryWord,
