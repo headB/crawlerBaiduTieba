@@ -1,42 +1,49 @@
-import urllib,urllib2
-from lxml import etree
-from gzip import GzipFile
-from StringIO import StringIO
-
 class fanyi:
     
-    #url = "http://192.168.113.12/test.php?xx=cc"
-    url = "http://fanyi.youdao.com/translate_o?smartresult=dict&smartresult=rule&sessionFrom=Null"
-    UA = {"User-Agent" : "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36",
+    url = "http://fanyi.youdao.com/translate_o?smartresult=dict&smartresult=rule"
+    #url = "http://fanyi.youdao.com/translate_o?smartresult=dict&smartresult=rule"
+    UA = {"User-Agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36 Edge/15.15063",
          "Accept":"application/json, text/javascript, */*; q=0.01",
 "Accept-Encoding":"gzip, deflate",
 "Accept-Language":"zh-CN,zh;q=0.9,en;q=0.8",
 "Connection":"keep-alive",
-"Content-Length":"205",
+#"Content-Length":"201",
+"Cache-Control":"no-cache",
 "Content-Type":"application/x-www-form-urlencoded; charset=UTF-8",
-#"Cookie":"OUTFOX_SEARCH_USER_ID_NCOO=1620479666.02586; _ntes_nnid=0a8e3aed990b197f278d02ff9e46c5a5,1501036955781; _ga=GA1.2.1193570179.1503487251; JSESSIONID=abcecwICJ6NkZcbzboibw; DICT_UGC=be3af0da19b5c5e6aa4e17bd8d90b28a|; SESSION_FROM_COOKIE=fanyiweb; UM_distinctid=1604f147b355f1-08cb5155b4e5dd-5b452a1d-144000-1604f147b36c0c; OUTFOX_SEARCH_USER_ID=-599451391@123.58.182.243; ___rl__test__cookies=1513155260270"
+#"Cookie":"OUTFOX_SEARCH_USER_ID=-984202758@10.168.8.61; JSESSIONID=aaab_t1HoLozmh8VH0xbw; OUTFOX_SEARCH_USER_ID_NCOO=1568397179.1416006; fanyi-ad-id=39535; fanyi-ad-closed=1; ___rl__test__cookies=1513301886980",
+"Cookie":"OUTFOX_SEARCH_USER_ID=-110@1010.168.8.22;JSESSIONID=aaab_t1HoLozmh8VH0xbw;",
 "Host":"fanyi.youdao.com",
 "Origin":"http://fanyi.youdao.com",
 "Referer":"http://fanyi.youdao.com/",
 "X-Requested-With":"XMLHttpRequest"
          }
-    tranlateWord = 'hello'
-    #"Content-Length":"201"
+    
+    cryptKey1 = "aNPG!!u6sesA>hBAW1@(-"
+    cryptKey2 = "fanyideskweb"
+    queryWord = "trump"
+
+    thisTime = int(time.time())*1000
+
+    str1 = cryptKey2+queryWord+str(thisTime)+cryptKey1
+
+    md5Tool = md5()
+    md5Tool.update(str1)
+    cryptStr = md5Tool.hexdigest()
+    
     post_json = {
         
-"i":"hello",
+"i":queryWord,
 "from":"AUTO",
 "to":"AUTO",
 "smartresult":"dict",
 "client":"fanyideskweb",
-"salt":"1513155260275",
-"sign":"5cb72b3d21c6a85cb45031a88ec9a2f5",
+"salt":thisTime,
+"sign":cryptStr,      
 "doctype":"json",
 "version":"2.1",
 "keyfrom":"fanyi.web",
-"action":"FY_BY_CLICKBUTTION",
+"action":"FY_BY_REALTIME",
 "typoResult":"false",
-        
     }
     
     def sendReq(self):
@@ -46,13 +53,14 @@ class fanyi:
         request = urllib2.Request(self.url,headers=self.UA,data=data)
         
         response = urllib2.urlopen(request,timeout=3).read()
-        
+        print(response)
         print(gzip(response))
         ##解压gzip内容
 def gzip(data):
         buf = StringIO(data)
         f = GzipFile(fileobj=buf)
         return f.read()
+    
         
 ##调用类和方法
 test = fanyi()
