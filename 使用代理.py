@@ -21,8 +21,10 @@ ipInfo = formatHtml.xpath("//dd")
 
 for x in ipInfo:
     print x.text
-    #for y in x:
-    #    print(y.text)
+    print(type(x))
+    for y in x:
+        print(y.text)
+        print(type(y))
 
 print(type(ipInfo))
 
