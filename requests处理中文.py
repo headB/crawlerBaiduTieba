@@ -19,15 +19,9 @@ UA = {"User-Agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.
          }
 
 response = requests.get(url,verify=False)
-codeChar = response.encoding
-print(codeChar)
-responseHtml = response.text.encode(codeChar)
-print(responseHtml)
-str2 = "\xc3\xa4\xc2\xb8\xc2\xad\xc3\xa5"
 
-st3 = "黎智煊"
+print(response.encoding)
 
-st3
+response.encoding = "utf-8"
 
-#responseHtml
-
+print(response.text)
