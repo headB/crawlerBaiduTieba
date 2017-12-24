@@ -25,3 +25,5 @@ print(response.encoding)
 response.encoding = "utf-8"
 
 print(response.text)
+
+##另外一种方式就是,得到content,就是原文,然后凭借自己经验去看编码,然后再还原就可以了.
