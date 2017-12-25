@@ -5,7 +5,8 @@ import time
 
 driver = webdriver.PhantomJS(executable_path="/home/kumanxuan/phantomjs-2.1.1-linux-x86_64/bin/phantomjs")
 #driver.get("https://www.taobao.com")
-driver.get("https://jd.com")
+#driver.get("https://jd.com")
+driver.get("http://www.gdcvi.net")
 ##不要这么逗好吗？不设置宽度，你还真是不按套路走
 
 driver.set_window_size(width=1920,height=1080)
