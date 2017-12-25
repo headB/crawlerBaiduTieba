@@ -47,3 +47,10 @@ rollView()
 
 
 driver.save_screenshot("taobao.png")
+
+
+#现在加载好京东之后，尝试保存html原码，然后看看能不能再里面找到一些关于价格的关键字。
+with open("jd.html",'w') as file:
+    file.write(driver.page_source)
+    
+driver.quit()
