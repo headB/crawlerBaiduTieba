@@ -4,8 +4,9 @@ from selenium.webdriver.common.keys import Keys
 import time
 
 driver = webdriver.PhantomJS(executable_path="/home/kumanxuan/phantomjs-2.1.1-linux-x86_64/bin/phantomjs")
-driver.get("https://www.taobao.com")
-#driver.get("https://jd.com")
+#driver.get("https://www.taobao.com")
+driver.get("https://jd.com")
+#driver.get("http://192.168.113.2/form/login.php")
 #driver.get("http://www.gdcvi.net")
 ##不要这么逗好吗？不设置宽度，你还真是不按套路走
 
@@ -17,14 +18,17 @@ js2 = "document.body.scrollTop=1080"
 
 time.sleep(1)
 
-#组合拳
-height = 1080
-for x in range(8):
-    jsSQL = "document.body.scrollTop="+str(height)
-    driver.execute_script(jsSQL)
-    print(height)
-    height += 1080
-    time.sleep(1)
+
+#组合拳,淘宝京东组合拳
+def rollView():
+    global driver
+    height = 1080
+    for x in range(12):
+        jsSQL = "document.body.scrollTop="+str(height)
+        driver.execute_script(jsSQL)
+        print(height)
+        height += 1080
+        time.sleep(2)
 
 #driver.execute_script(js)
 #time.sleep(6)
@@ -35,6 +39,11 @@ for x in range(8):
 
 #driver.execute_script(js3)
 #time.sleep(2)
+
+#调用上面定义的滚动浏览，就可以完整获取有些网页因为脚本限制的问题，但是不调用的话，也是没有影响。
+##因为默认是调用第一页的。或者是，没有限制的完整一页。
+rollView()
+
 
 
 driver.save_screenshot("taobao.png")
