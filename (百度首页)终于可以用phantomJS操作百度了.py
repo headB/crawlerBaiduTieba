@@ -26,7 +26,7 @@ def rollView():
         time.sleep(1)
 
 #rollView()
-time.sleep(2)
+#time.sleep(2)
 
 
 with open('testBaidu.html','w') as file:
@@ -34,10 +34,11 @@ with open('testBaidu.html','w') as file:
     
 driver.save_screenshot("baidu1.png")
 
-#js  = "var x document.getElementByName(\"wd\");x.style.border=\"10px solid red\""
+js  = "var x = document.getElementById(\"lg\");x.style.backgroundColor=\"red\";"
 
-#driver.execute_script(js)
+driver.execute_script(js)
 
-#driver.save_screenshot("baidu2.png")
+driver.save_screenshot("baidu2.png")
 
 driver.quit()
+
