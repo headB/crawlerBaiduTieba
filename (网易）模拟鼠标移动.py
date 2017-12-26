@@ -32,9 +32,26 @@ def rollView(times=2):
 
 target = driver.find_element_by_id("js_N_navHighlight")
 
+#target2 = driver.find_element_by_class_name("ntes-nav-select ntes-nav-select-wide ntes-nav-app js_N_navSelect c-fl")
+
+target2 = driver.find_element_by_xpath("//div[@class='ntes-nav-select ntes-nav-select-wide ntes-nav-app js_N_navSelect c-fl']")
+
 Ac(driver).move_to_element(target).perform()
 #Ac(driver)
-time.sleep(1)
-driver.save_screenshot("163com.png")
+time.sleep(2)
+driver.save_screenshot("163_1com.png")
+
+
+##上面的代码是移动到“应用”的栏目上面
+
+##然后下面这里就移动到“登陆”的栏目上面。
+
+Ac(driver).move_to_element(target2).perform()
+time.sleep(2)
+driver.save_screenshot("163_2com.png")
+
+
+with open('163com.html','w') as file:
+    file.write(driver.page_source)
 
 driver.quit()
