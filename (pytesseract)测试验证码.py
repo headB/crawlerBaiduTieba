@@ -37,6 +37,7 @@ url1 = "http://192.168.113.2/form/checkLogin.php"
 check = True
 
 def tryLogin():
+    global check
     response2 = sessionInfo.post(url1,data=formData)
     print(response2.content)
     ##请尽量使用search
@@ -44,6 +45,14 @@ def tryLogin():
     ##暂时使用普通方法是验证是否存在匹配.
     if "group" in dir(checkInfo):
         print("成功登陆页面了.!!!\(≧▽≦)/")
+        print(response2.content)
+        
+        ##这个是获取到跳转地址的网址
+        #httpJump = re.search('')
+        
+        response4 = sessionInfo.get('http://192.168.113.2/form/prepare_setting.php')
+        
+        check = False
 
 ##获取验证码，并且保存本地准备匹配验证码
 
@@ -54,4 +63,6 @@ while check:
     tryLogin()
     time.sleep(2)
     
+
+
 
