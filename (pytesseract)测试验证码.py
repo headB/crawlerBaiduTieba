@@ -1,9 +1,13 @@
 import pytesseract
 from PIL import Image
 import time
+improt re
 ##动态去捉取老师评价网站的验证码并下载下来保存到本地
 
 #这个是要访问的网站，就是自己设计的网站，哈哈哈哈哈。
+
+sessionInfo = requests.session()
+
 url = "http://192.168.113.2/form/image.php"
 
 formData = dict()
@@ -26,19 +30,28 @@ def getCode():
     "submit":"xx",
     "codeImage":text
     }
-
+    
 
 url1 = "http://192.168.113.2/form/checkLogin.php"
+
+check = True
 
 def tryLogin():
     response2 = sessionInfo.post(url1,data=formData)
     print(response2.content)
+    ##请尽量使用search
+    checkInfo = re.search('成功',response2.content)
+    ##暂时使用普通方法是验证是否存在匹配.
+    if "group" in dir(checkInfo):
+        print("成功登陆页面了.!!!\(≧▽≦)/")
 
 ##获取验证码，并且保存本地准备匹配验证码
 
-while True:
+##这里设置多一个参数,当检测到检查的状态还是真的话,就继续检查,不是的话,就登陆成功,并且获取信息.
+while check:
 
     getCode()
     tryLogin()
     time.sleep(2)
+    
 
