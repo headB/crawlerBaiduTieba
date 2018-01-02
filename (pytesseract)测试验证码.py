@@ -50,9 +50,65 @@ def tryLogin():
         ##这个是获取到跳转地址的网址
         #httpJump = re.search('')
         
+        ##转换一下cookie,让selenium可以使用.
+        
+        cookieInfo = requests.utils.dict_from_cookiejar(sessionInfo.cookies)
+        
+        print(cookieInfo)
+        
+        for x in cookieInfo:
+            c = {}
+            c['name'] = "PHPSESSID"
+            c['value'] = cookieInfo["PHPSESSID"]
+            c['domain'] = '192.168.113.2'
+            c['page'] = '/'
+            c['httponly'] = False
+            c['secure'] = False
+            c['expires']= "Tue, 09 Jan 2018 16:22:02 -0000"
+       
+        #print(c)
+        d = [c,]
         response4 = sessionInfo.get('http://192.168.113.2/form/prepare_setting.php')
         
         check = False
+        
+##[{u'domain': u'192.168.113.2', u'name': u'PHPSESSID', u'value': u'628bpl9k0hsvrvpcjjqhpkiqf3', u'path': u'/', u'httponly': False, u'secure': False}]
+        e = [{u'domain': u'192.168.113.2', 
+              u'name': u'PHPSESSID',
+              u'value': u'628bpl9k0hsvrvpcjjqhpkiqf3',
+              u'path': u'/', u'httponly': False, 
+              u'secure': False},]
+             
+        driver = webdriver.PhantomJS(executable_path="/home/kumanxuan/phantomjs-2.1.1-linux-x86_64/bin/phantomjs")
+        driver.set_window_size(width=1920,height=1080)
+        ##如何让selenium使用cookie呢???字典的那种.
+        #driver.delete_all_cookies()
+        #driver.add_cookie(e)
+       
+        driver.get("http://192.168.113.2/form/prepare_setting.php")
+        
+        savedCookies = driver.get_cookies()
+        driver.delete_all_cookies()
+        for x in savedCookies:
+            for y in ('name', 'value', 'domain', 'path', 'expiry'):
+                if y not in list(x.keys()):
+                    if y == 'expiry':
+                        t = time.time()
+                        x[y] = int(t)
+                        
+            #嗯,换句话,就是,,,这个是可迭代对象??????
+            driver.add_cookie({k: x[k] for k in ('name','value','domain','path','expiry') if k in x  })
+        
+        
+        #driver.add_cookie(savedCookies)
+        
+        driver.get("http://192.168.113.2/form/prepare_setting.php")
+        
+        print(driver.get_cookies())
+        
+        driver.save_screenshot("estimate.png")
+        
+        
 
 ##获取验证码，并且保存本地准备匹配验证码
 
@@ -63,6 +119,7 @@ while check:
     tryLogin()
     time.sleep(2)
     
+
 
 
 
