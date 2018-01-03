@@ -64,24 +64,14 @@ def tryLogin():
         
         response4 = driver.get('http://192.168.113.2/form/image.php')
         savedCookies = driver.get_cookies()
-        
-        ##创建一个新字典,用来保存cookie数据.
-        
-        newCookieDict = {}
-        
-        for t in savedCookies[0].keys():
-            if t  in ('httponly','secure','/'):
-                newCookieDict[t] = savedCookies[0][t]
-            else:
-                newCookieDict[t] = savedCookies[0][t].decode("utf-8")
-        newCookieDict['value'] = phpId
-        
-        print(newCookieDict)
-        #OK!!转换好格式了,准备去测试登陆/        
             
-        
         driver.delete_all_cookies()
-        driver.add_cookie(newCookieDict)
+        
+        for x1 in savedCookies:
+            print(x1)
+            x1['value'] = phpId.decode("utf-8")
+            print(x1)
+            driver.add_cookie(x1)
         
        
         driver.get("http://192.168.113.2/form/prepare_setting.php")
@@ -98,4 +88,6 @@ while check:
     getCode()
     tryLogin()
     #time.sleep(2)
+    
+
     
