@@ -53,59 +53,39 @@ def tryLogin():
         ##转换一下cookie,让selenium可以使用.
         
         cookieInfo = requests.utils.dict_from_cookiejar(sessionInfo.cookies)
-        
-        print(cookieInfo)
-        
-        for x in cookieInfo:
-            c = {}
-            c['name'] = "PHPSESSID"
-            c['value'] = cookieInfo["PHPSESSID"]
-            c['domain'] = '192.168.113.2'
-            c['page'] = '/'
-            c['httponly'] = False
-            c['secure'] = False
-            c['expires']= "Tue, 09 Jan 2018 16:22:02 -0000"
        
-        #print(c)
-        d = [c,]
-        response4 = sessionInfo.get('http://192.168.113.2/form/prepare_setting.php')
+        phpId = cookieInfo['PHPSESSID']
+        print(phpId)
         
         check = False
-        
-##[{u'domain': u'192.168.113.2', u'name': u'PHPSESSID', u'value': u'628bpl9k0hsvrvpcjjqhpkiqf3', u'path': u'/', u'httponly': False, u'secure': False}]
-        e = [{u'domain': u'192.168.113.2', 
-              u'name': u'PHPSESSID',
-              u'value': u'628bpl9k0hsvrvpcjjqhpkiqf3',
-              u'path': u'/', u'httponly': False, 
-              u'secure': False},]
-             
+         
         driver = webdriver.PhantomJS(executable_path="/home/kumanxuan/phantomjs-2.1.1-linux-x86_64/bin/phantomjs")
         driver.set_window_size(width=1920,height=1080)
-        ##如何让selenium使用cookie呢???字典的那种.
-        #driver.delete_all_cookies()
-        #driver.add_cookie(e)
+        
+        response4 = driver.get('http://192.168.113.2/form/image.php')
+        savedCookies = driver.get_cookies()
+        
+        ##创建一个新字典,用来保存cookie数据.
+        
+        newCookieDict = {}
+        
+        for t in savedCookies[0].keys():
+            if t  in ('httponly','secure','/'):
+                newCookieDict[t] = savedCookies[0][t]
+            else:
+                newCookieDict[t] = savedCookies[0][t].decode("utf-8")
+        newCookieDict['value'] = phpId
+        
+        print(newCookieDict)
+        #OK!!转换好格式了,准备去测试登陆/        
+            
+        
+        driver.delete_all_cookies()
+        driver.add_cookie(newCookieDict)
+        
        
         driver.get("http://192.168.113.2/form/prepare_setting.php")
-        
-        savedCookies = driver.get_cookies()
-        driver.delete_all_cookies()
-        for x in savedCookies:
-            for y in ('name', 'value', 'domain', 'path', 'expiry'):
-                if y not in list(x.keys()):
-                    if y == 'expiry':
-                        t = time.time()
-                        x[y] = int(t)
-                        
-            #嗯,换句话,就是,,,这个是可迭代对象??????
-            driver.add_cookie({k: x[k] for k in ('name','value','domain','path','expiry') if k in x  })
-        
-        
-        #driver.add_cookie(savedCookies)
-        
-        driver.get("http://192.168.113.2/form/prepare_setting.php")
-        
-        print(driver.get_cookies())
-        
+               
         driver.save_screenshot("estimate.png")
         
         
@@ -117,9 +97,5 @@ while check:
 
     getCode()
     tryLogin()
-    time.sleep(2)
+    #time.sleep(2)
     
-
-
-
-
