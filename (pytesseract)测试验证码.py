@@ -101,7 +101,48 @@ def startLogin():
         tryLogin()
     
 ##然后再另外设置一个功能去分析html原码,提取自己想要的数据.
-startLogin()
+#startLogin()
+
+htmlSource = open("htmlSource/estimate.html","r").readlines()
+
+responseStr = ''.join(htmlSource)
+
+##哈哈.自动就decode了,但是有个问题,他是怎么知道我是utf-8呢...所以,,,这个还是不太好.
+#print(responseStr)
+
+response6 = etree.HTML(responseStr)
+
+
+##这里可以原样输出unicode
+#pInfo = response6.xpath("//p")
+#for x in pInfo:
+#    print(type(x.text))
+#    print(x.text)
+#    print(x.text.encode("unicode-escape"))
+
+
+pInfo = response6.xpath("//select")
+for x in pInfo:
+    y = x.xpath('string(.)')
+    z1 = x.xpath("string()")
+    z2 = re.sub('[\t\n\r]','',z1)
+    print(z2)
+    z = re.sub('[\t\n\r]','',y)
+    #print(type(x.text))
+    print(z)
+    print(y.encode("unicode-escape"))
+
+
+##上面读到的代码,是的代码文本.
+
+##突然间我想到一个问题,那就是,我试试decode啦????先decode再encode,试试啦.
+
+#response = response5.decode("utf-8")
+
+#print(response)
+
+
+
 
 
     
