@@ -121,15 +121,33 @@ response6 = etree.HTML(responseStr)
 #    print(x.text.encode("unicode-escape"))
 
 
+##这是添加一个条件,用于筛选自己想要的指定的文本
+#pInfo1 = response6.xpath("//select[@name='block']//text()")
+#for x1 in pInfo1:
+#    print(x1)
+
+
+##使用另外一种xpath的寻找方式
+
+pInfo1 = response6.findall(".//select[@name='block']/option")
+for x1 in pInfo1:
+    print(x1.text)
+
+print("")
+    
+pInfo2 = response6.xpath("//select/option")
+for x2 in pInfo2:
+    print(x2.text)
+    
+print("")
+    
 pInfo = response6.xpath("//select//text()")
-
-
 for x in pInfo:
     v1 = x.strip().encode("unicode-escape")
     v2 = x.strip()
     if v1:
-        print(v1)
-        print(v2)
+        pass
+        #print(v2)
 
 ##上面读到的代码,是的代码文本.
 
@@ -138,6 +156,8 @@ for x in pInfo:
 #response = response5.decode("utf-8")
 
 #print(response)
+
+
 
 
 
