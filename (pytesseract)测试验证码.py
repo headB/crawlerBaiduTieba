@@ -121,17 +121,15 @@ response6 = etree.HTML(responseStr)
 #    print(x.text.encode("unicode-escape"))
 
 
-pInfo = response6.xpath("//select")
-for x in pInfo:
-    y = x.xpath('string(.)')
-    z1 = x.xpath("string()")
-    z2 = re.sub('[\t\n\r]','',z1)
-    print(z2)
-    z = re.sub('[\t\n\r]','',y)
-    #print(type(x.text))
-    print(z)
-    print(y.encode("unicode-escape"))
+pInfo = response6.xpath("//select//text()")
 
+
+for x in pInfo:
+    v1 = x.strip().encode("unicode-escape")
+    v2 = x.strip()
+    if v1:
+        print(v1)
+        print(v2)
 
 ##上面读到的代码,是的代码文本.
 
@@ -140,6 +138,7 @@ for x in pInfo:
 #response = response5.decode("utf-8")
 
 #print(response)
+
 
 
 
