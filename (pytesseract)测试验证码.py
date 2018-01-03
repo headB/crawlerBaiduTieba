@@ -47,6 +47,8 @@ def tryLogin():
         print("成功登陆页面了.!!!\(≧▽≦)/")
         print(response2.content)
         
+        check = False
+        
         ##这个是获取到跳转地址的网址
         #httpJump = re.search('')
         
@@ -57,7 +59,6 @@ def tryLogin():
         phpId = cookieInfo['PHPSESSID']
         print(phpId)
         
-        check = False
          
         driver = webdriver.PhantomJS(executable_path="/home/kumanxuan/phantomjs-2.1.1-linux-x86_64/bin/phantomjs")
         driver.set_window_size(width=1920,height=1080)
@@ -78,16 +79,31 @@ def tryLogin():
                
         driver.save_screenshot("estimate.png")
         
+        ##现在想办法把网页的原码导出来,然后处理.
+        ##现在是想提取可以评价的类型,所以可以评价的课室
+        ##评价对象等等这些信息.
+        
+        ##下面这里就可以涉及文件IO了.
+        with open('htmlSource/estimate.html','wb') as file1:
+            file1.write(driver.page_source.encode("utf-8"))
+        driver.quit()
         
 
 ##获取验证码，并且保存本地准备匹配验证码
 
 ##这里设置多一个参数,当检测到检查的状态还是真的话,就继续检查,不是的话,就登陆成功,并且获取信息.
-while check:
 
-    getCode()
-    tryLogin()
-    #time.sleep(2)
+#定义好这个函数,可以自由去调取使用
+def startLogin():
+    #check = False
+    while check:
+        getCode()
+        tryLogin()
+    
+##然后再另外设置一个功能去分析html原码,提取自己想要的数据.
+startLogin()
+
+
     
 
     
