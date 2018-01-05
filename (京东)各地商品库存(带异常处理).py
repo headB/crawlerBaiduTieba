@@ -51,10 +51,16 @@ def firstCheck():
 
 def analyseHtmlSource():
     #print(htmlResponse)
-    htmlFormat = etree.HTML(htmlResponse)
-    addressInfo = htmlFormat.xpath("//div[@class='tab-con']//text()")
+    #print(type(htmlResponse.decode("utf-8")))
     
-    print(addressInfo)
+    #这里居然是因为输入的不是unicode而出问题,不过本来京东的页面是gbk的.
+    ##这里就踩坑了.!!!
+    htmlFormat = etree.HTML(htmlResponse.decode("utf-8"))
+    addressInfo = htmlFormat.xpath("//div[@class='address-tab J-address-tab ETab']/div/div[@data-level='0']/li/a/text()")
+    #addressInfo = htmlFormat.xpath("//title")
+    #print(addressInfo)
+    for x in addressInfo:
+        print(x) ,
     #for x in addressInfo:
     #    print(type(x.text))
         
