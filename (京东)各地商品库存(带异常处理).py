@@ -78,3 +78,4 @@ if __name__ == "__main__":
     
 ##找出所有的省份
 #analyseHtmlSource()
+#今天在处理unicode的问题
