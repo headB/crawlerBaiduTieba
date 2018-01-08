@@ -3,10 +3,13 @@ import requests
 from selenium import webdriver
 import time
 from lxml import etree
+import json
+import re
 
 url = "https://item.jd.com/4161503.html"
 
 htmlResponse = ''
+addressList = ''
 
 def getHtmlSource():
     
@@ -14,10 +17,8 @@ def getHtmlSource():
     ##相当复杂,所以现在决定使用神器,selenium
     
     global htmlResponse
-    #htmlResponse = requests.get(url=url).text
-    #print(type(htmlResponse))
+    global addressList
     
-    #phantom = webdriver.PhantomJS(executable_path="/home/kumanxuan/phantomjs-2.1.1-linux-x86_64/bin/phantomjs")
     phantom = webdriver.PhantomJS()
     
     phantom.get(url)
@@ -34,6 +35,7 @@ def getHtmlSource():
     
     addressUrl1 = "https://static.360buyimg.com/item/??assets/address/area.js,default/1.0.37/components/address/stock.js,default/1.0.37/components/EDropdown/EDropdown.js,default/1.0.37/components/ETab/ETab.js"
     addressSource1 = requests.get(addressUrl1)
+    addressList = addressSource1.text
     with open("htmlSource/jd-address.js",'w') as file4:
         file4.write(addressSource1.text.encode("utf-8"))
         
@@ -51,17 +53,41 @@ def fileExist():
 
 def firstCheck():
     global htmlResponse
+    global addressList
     fileInfo = fileExist()
     if  fileInfo:
         with open("htmlSource/jd-1.html","r") as file2:
             htmlResponseList = file2.readlines()
-            #print(type(htmlResponse))
             htmlResponse = "".join(htmlResponseList)
             htmlResponse = htmlResponse.decode("utf-8").encode("utf-8")
+            
+        with open('htmlSource/jd-address.js') as file5:
+            addressList = file5.readlines()
+            #addressList = ''.join(addressList)
+            #addressList = addressList.decode('utf-8')
+            
     else:
         getHtmlSource()
         #现在去获取一个京东页面
 
+        
+        
+#从资源里面获取省份和城市
+def getCity(stringInput,reStr='common_cityMap.+?common_cityMap'):
+    addressStr = ''
+    for x in stringInput:
+        str1 = x.replace('\n',"")
+        addressStr += str1
+    strInfo = re.search(pattern=reStr,string=addressStr).group()
+    #print(strInfo)
+    strInfo1 = re.search('{.*}',strInfo).group().replace("'",'"')
+    addressJson = json.loads(strInfo1)
+    print(type(addressJson))
+        
+    return addressJson
+#addressDict = json.decoder
+        
+        
 def analyseHtmlSource():
     #print(htmlResponse)
     #print(type(htmlResponse.decode("utf-8")))
@@ -72,14 +98,28 @@ def analyseHtmlSource():
     htmlFormat = etree.HTML(htmlResponse.decode("utf-8"))
     addressInfo = htmlFormat.xpath("//div[@class='address-tab J-address-tab ETab']/div/div[@data-level='0']/li")
     
+    #原来json并不是json格式的.
+    #addressFormat = etree.HTML(addressList)
+    #secondAddress = addressFormat.xpath('')
+    
+    ##尝试转换json格式
+    
+    #addressJsonInfo = re.search(pattern=r'common_cityMap = .+return common_cityMap',string=addressList)
+    cityInfo = getCity(addressList)
+    for x,y in cityInfo.items():
+        print(x),
+        print(y)
+    
+    
     ##循环省份名称和代码
     ##然后,可以配合循环,去查询,看看对应的这个地方有没有货
     for x in addressInfo:
         y = x.xpath("./a/text()")
         print(y[0]),
         
-        y1 = x.xpath("./@data-value")
-        print(y1[0])
+    
+        
+    ##打印完省份之后,打印城市,而且是对应省份
 
 def main():
     ##打开前先检查
