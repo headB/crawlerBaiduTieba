@@ -22,9 +22,21 @@ def getHtmlSource():
     
     phantom.get(url)
     htmlResponse = phantom.page_source
+    htmlResponse = htmlResponse.encode("utf-8")
     #print(htmlResponse)
-    with open("htmlSource/jd-1.html","wb") as file1:
-        file1.write(htmlResponse.encode("utf-8"))
+    
+    ##首先获取商品页面
+    with open("htmlSource/jd-1.html","w") as file1:
+        file1.write(htmlResponse)
+        
+    ##然后获取实时的所有省份,城市信息
+    ##其实我在想,省份和城市还有变化信息????
+    
+    addressUrl1 = "https://static.360buyimg.com/item/??assets/address/area.js,default/1.0.37/components/address/stock.js,default/1.0.37/components/EDropdown/EDropdown.js,default/1.0.37/components/ETab/ETab.js"
+    addressSource1 = requests.get(addressUrl1)
+    with open("htmlSource/jd-address.js",'w') as file4:
+        file4.write(addressSource1.text.encode("utf-8"))
+        
     
 
 ##设置一个try
@@ -45,6 +57,7 @@ def firstCheck():
             htmlResponseList = file2.readlines()
             #print(type(htmlResponse))
             htmlResponse = "".join(htmlResponseList)
+            htmlResponse = htmlResponse.decode("utf-8").encode("utf-8")
     else:
         getHtmlSource()
         #现在去获取一个京东页面
@@ -55,16 +68,18 @@ def analyseHtmlSource():
     
     #这里居然是因为输入的不是unicode而出问题,不过本来京东的页面是gbk的.
     ##这里就踩坑了.!!!
+    
     htmlFormat = etree.HTML(htmlResponse.decode("utf-8"))
-    addressInfo = htmlFormat.xpath("//div[@class='address-tab J-address-tab ETab']/div/div[@data-level='0']/li/a/text()")
-    #addressInfo = htmlFormat.xpath("//title")
-    #print(addressInfo)
+    addressInfo = htmlFormat.xpath("//div[@class='address-tab J-address-tab ETab']/div/div[@data-level='0']/li")
+    
+    ##循环省份名称和代码
+    ##然后,可以配合循环,去查询,看看对应的这个地方有没有货
     for x in addressInfo:
-        print(x) ,
-    #for x in addressInfo:
-    #    print(type(x.text))
+        y = x.xpath("./a/text()")
+        print(y[0]),
         
-        
+        y1 = x.xpath("./@data-value")
+        print(y1[0])
 
 def main():
     ##打开前先检查
@@ -78,4 +93,3 @@ if __name__ == "__main__":
     
 ##找出所有的省份
 #analyseHtmlSource()
-#今天在处理unicode的问题
