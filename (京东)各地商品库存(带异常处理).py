@@ -10,6 +10,9 @@ url = "https://item.jd.com/4161503.html"
 
 htmlResponse = ''
 addressList = ''
+provinceMergeInfo = {}
+provinceCodeInfo = {}
+
 
 def getHtmlSource():
     
@@ -63,8 +66,7 @@ def firstCheck():
             
         with open('htmlSource/jd-address.js') as file5:
             addressList = file5.readlines()
-            #addressList = ''.join(addressList)
-            #addressList = addressList.decode('utf-8')
+            
             
     else:
         getHtmlSource()
@@ -83,25 +85,23 @@ def getCity(stringInput,reStr='common_cityMap.+?common_cityMap'):
     addressJson = json.loads(strInfo1)
     return addressJson
 #addressDict = json.decoder
-        
-        
-def analyseHtmlSource():
-    
-    htmlFormat = etree.HTML(htmlResponse.decode("utf-8"))
-    addressInfo = htmlFormat.xpath("//div[@class='address-tab J-address-tab ETab']/div/div[@data-level='0']/li")
-    provinceCodeInfo = {}
-    
-    provinceMergeInfo = {}
-    
-    def processProvinceCode(addressInfo):
-        #global provinceCodeInfo
+
+
+#这个设置公共的方法吧
+##先查询这个市的所有区的信息
+def getCountry():
+    pass
+
+def processProvinceCode(addressInfo):
+        global provinceCodeInfo
         for x in addressInfo:
             y = x.xpath("./a/text()")
             y1 = x.xpath("./@data-value")
             provinceCodeInfo[y1[0]] = y[0]
-        
-    ##把所有分散的市归好类
-    def processingCity(addressList):
+            
+            
+ ##把所有分散的市归好类
+def processingCity(addressList):
         
         #addressJsonInfo = re.search(pattern=r'common_cityMap = .+return common_cityMap',string=addressList)
         #ProvinceCode = {}
@@ -126,6 +126,12 @@ def analyseHtmlSource():
                 provinceInfo['city'] = [city,]
                 provinceMergeInfo[cityCode[0]] = provinceInfo
         
+        
+def analyseHtmlSource():
+    
+    htmlFormat = etree.HTML(htmlResponse.decode("utf-8"))
+    addressInfo = htmlFormat.xpath("//div[@class='address-tab J-address-tab ETab']/div/div[@data-level='0']/li")
+    
     
     processProvinceCode(addressInfo)
     processingCity(addressList)
@@ -133,17 +139,21 @@ def analyseHtmlSource():
     for x,y in provinceMergeInfo.items():
         print("省ID:"),
         print(x),
-        print("省名称是:"),
-        print(y['provinceName']),
+        print(" 省名称是:"),
+        print(y['provinceName']+' | ')
         for x1 in y['city']:
+            print("      "),
             print(x1['cityName']),
+            print('-'),
+            print(x1['code'])
         print("\n")
     
     ##循环省份名称和代码
     ##然后,可以配合循环,去查询,看看对应的这个地方有没有货
         
     ##打印完省份之后,打印城市,而且是对应省份
-
+    
+    
 def main():
     ##打开前先检查
     firstCheck()
