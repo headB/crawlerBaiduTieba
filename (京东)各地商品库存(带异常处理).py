@@ -91,6 +91,8 @@ def analyseHtmlSource():
     addressInfo = htmlFormat.xpath("//div[@class='address-tab J-address-tab ETab']/div/div[@data-level='0']/li")
     provinceCodeInfo = {}
     
+    provinceMergeInfo = {}
+    
     def processProvinceCode(addressInfo):
         #global provinceCodeInfo
         for x in addressInfo:
@@ -98,37 +100,47 @@ def analyseHtmlSource():
             y1 = x.xpath("./@data-value")
             provinceCodeInfo[y1[0]] = y[0]
         
+    ##把所有分散的市归好类
     def processingCity(addressList):
         
         #addressJsonInfo = re.search(pattern=r'common_cityMap = .+return common_cityMap',string=addressList)
-        ProvinceCode = {}
+        #ProvinceCode = {}
         cityInfo = getCity(addressList)
+        
         for x,y in cityInfo.items():
-            
+            #x是各个市的中文名
+            #y第一个是省代码,第二个是自己的城市识别号
             cityCode = y.split("|")
-           
-            if cityCode[0] in ProvinceCode:
-                ProvinceCode[cityCode[0]].update({cityCode[1]:x})
+            city = {}
+            city['code'] = cityCode[1]
+            city['cityName'] = x
+            
+            if cityCode[0] in provinceMergeInfo:
+                ##这里位置应该设计成使用数组
+                ##provinceMergeInfo[cityCode[0]]['city'].append([city,])
+                #上面的这条不小心弄错了.
+                provinceMergeInfo[cityCode[0]]['city'].append(city,)
             else:
-                ProvinceCode[cityCode[0]] = {cityCode[1]:x}
-        for x,y in ProvinceCode.items():
-            print(x),
-            print(provinceCodeInfo[x]),
-            print("省----"),
-            for x1,x2 in y.items():
-                print(x2),
-            print("")
+                provinceInfo = {}
+                provinceInfo['provinceName'] = provinceCodeInfo[cityCode[0]]
+                provinceInfo['city'] = [city,]
+                provinceMergeInfo[cityCode[0]] = provinceInfo
+        
     
     processProvinceCode(addressInfo)
     processingCity(addressList)
     
+    for x,y in provinceMergeInfo.items():
+        print("省ID:"),
+        print(x),
+        print("省名称是:"),
+        print(y['provinceName']),
+        for x1 in y['city']:
+            print(x1['cityName']),
+        print("\n")
+    
     ##循环省份名称和代码
     ##然后,可以配合循环,去查询,看看对应的这个地方有没有货
-    
-    
-    
-   
-    
         
     ##打印完省份之后,打印城市,而且是对应省份
 
