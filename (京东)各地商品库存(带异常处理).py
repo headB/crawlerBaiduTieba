@@ -79,11 +79,8 @@ def getCity(stringInput,reStr='common_cityMap.+?common_cityMap'):
         str1 = x.replace('\n',"")
         addressStr += str1
     strInfo = re.search(pattern=reStr,string=addressStr).group()
-    #print(strInfo)
     strInfo1 = re.search('{.*}',strInfo).group().replace("'",'"')
     addressJson = json.loads(strInfo1)
-    print(type(addressJson))
-        
     return addressJson
 #addressDict = json.decoder
         
@@ -92,16 +89,15 @@ def analyseHtmlSource():
     
     htmlFormat = etree.HTML(htmlResponse.decode("utf-8"))
     addressInfo = htmlFormat.xpath("//div[@class='address-tab J-address-tab ETab']/div/div[@data-level='0']/li")
+    provinceCodeInfo = {}
     
-    
-    for x in addressInfo:
-        y = x.xpath("./a/text()")
-        print(y[0]),
+    def processProvinceCode(addressInfo):
+        #global provinceCodeInfo
+        for x in addressInfo:
+            y = x.xpath("./a/text()")
+            y1 = x.xpath("./@data-value")
+            provinceCodeInfo[y1[0]] = y[0]
         
-        y1 = x.xpath("./@data-value")
-        print(y1[0])
-    
-    
     def processingCity(addressList):
         
         #addressJsonInfo = re.search(pattern=r'common_cityMap = .+return common_cityMap',string=addressList)
@@ -117,11 +113,13 @@ def analyseHtmlSource():
                 ProvinceCode[cityCode[0]] = {cityCode[1]:x}
         for x,y in ProvinceCode.items():
             print(x),
+            print(provinceCodeInfo[x]),
+            print("省----"),
             for x1,x2 in y.items():
                 print(x2),
             print("")
     
-    
+    processProvinceCode(addressInfo)
     processingCity(addressList)
     
     ##循环省份名称和代码
