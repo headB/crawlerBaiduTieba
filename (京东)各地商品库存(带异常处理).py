@@ -94,6 +94,8 @@ def getCountry(queryCityCode='1753'):
         "fid":queryCityCode,
     }
     
+##查询这个市所有的镇
+    
     response = requests.get(url=url,params=queryStr)
     #print(response.text)
     print("")
@@ -153,6 +155,11 @@ def analyseHtmlSource():
     ##打印完省份之后,打印城市,而且是对应省份
     
     def queryCommodityNum():
+        
+        province = ''
+        country = ''
+        town = ''
+        
         print("请输入对应省份的ID:")
         i = 1
         for x,y in provinceMergeInfo.items():
@@ -165,34 +172,89 @@ def analyseHtmlSource():
         
         enter = True
         while enter: 
-            province = raw_input("请输入省份ID:")
-            print(type(province))
+            province = raw_input("\n请输入省份ID:")
             if province not in provinceMergeInfo.keys():
                 print('无法找到,请重新输入')
             else:
                 enter = False
-                
+            print("==================================================")
+            i1 = 1
+            cityS = {}
+            for x in provinceMergeInfo[province]['city']:
+                    print(x['cityName']+"--"),
+                    print(x['code']+'  '),
+                    cityS[x['code']] = x['cityName']
+                    if i1 ==5:
+                        print("")
+                        i1=1
+                    i1+=1
+                    enter = True
             
-            #首先选择省份
-            print("省ID:"),
-            print(province),
-            print(" 省名称是:"),
-            print(provinceMergeInfo[province]['provinceName']+' | ')
-            for x1 in provinceMergeInfo[province]['city']:
-                print("      "),
-                print(x1['cityName']),
-                print('-'),
-                print(x1['code'])
-                countryInfo = getCountry(x1['code'])
+            while enter:
+                    city = raw_input("\n请选择输入一个城市ID:")
+                    if city in cityS.keys():
+                        enter = False
+                    else:
+                        print("不正确,请重新输入")
+                    print("========================================")
+            countryInfo = getCountry(city)
+            if countryInfo:
+                countryS = {}
                 for x in countryInfo:
-                    print("      "),
-                    print("      "),
-                    print(x['name'])
-                print("")
-                
-            print("\n")
+                    print(x['name']+"--"),
+                    print(x['id'])
+                    countryS[x['id']] = x['name']
+                enter = True
+                #print("\n请选择一个ID输入:")
+                while enter:
+                    country = raw_input("\n请选择一个ID输入:")
+                    if int(country) in countryS.keys():
+                        enter = False
+                    else:
+                        print("不正确,请重新输入")
+                    print("========================================")
+                townInfo = getCountry(country)
+                if townInfo:
+                    townInfoS = {}
+                    for x in townInfo:
+                        print(x['name']+'--'),
+                        print(x['id'])
+                        townInfoS[x['id']] = x['name']
+                        
+                    enter = True
+                    while enter:
+                        town = raw_input("请输入一个ID:")
+                        if int(town) in townInfoS.keys():
+                            enter = False
+                        else:
+                             print("不正确,请重新输入")
+                        print("========================================")
+                        
+                        print("this is code")
+                        
+                        
+                    commodityInfo = {}
+                    
+        queryStrAddr = province+"_"+city+"_"+country        
+        print("xx")
+        if town:
+            queryStrAddr += '_'+town
             
-    
+        print(queryStrAddr)
+        
+        url = "https://c0.3.cn/stock?skuId=5225346&area="+queryStrAddr+"&venderId=1000000127&cat=670,671,672&buyNum=1&choseSuitSkuIds=&extraParam={%22originid%22:%221%22}&ch=1&fqsp=0&pduid=14951566389341617979946&pdpin=jd_5835d8182bb8f&detailedAdd=null&callback=jQuery2843463"
+        print(url)
+        
+        response = requests.get(url)
+        #print(response.text)
+        
+        info = re.search(pattern="有货",string=response.text)
+        
+        if "group" in dir(info):
+            print("有货,赶紧买")
+        else:
+            print("唔好意思,该地区冇货,有钱都冇用")
+        
     #这里应该多设置一个参数,就是接受外部参数,输入之后搜索,
     queryCommodityNum()
     
@@ -214,5 +276,7 @@ if __name__ == "__main__":
     
 ##找出所有的省份
 #analyseHtmlSource()
+
+
 
 
