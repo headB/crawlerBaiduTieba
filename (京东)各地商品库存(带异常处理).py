@@ -85,12 +85,24 @@ def getCity(stringInput,reStr='common_cityMap.+?common_cityMap'):
     addressJson = json.loads(strInfo1)
     return addressJson
 #addressDict = json.decoder
-
-
 #这个设置公共的方法吧
 ##先查询这个市的所有区的信息
-def getCountry():
-    pass
+def getCountry(queryCityCode='1753'):
+    url = "https://d.jd.com/area/get?"
+    queryStr =  {
+        "callback":"getAreaListCallback",
+        "fid":queryCityCode,
+    }
+    
+    response = requests.get(url=url,params=queryStr)
+    #print(response.text)
+    print("")
+    responseInfo = re.search(pattern=('\[.+\]'),string=response.text)
+    if "group" not in dir(responseInfo):
+        return False
+    responseJsonStr = responseInfo.group()
+    responseJson = json.loads(responseJsonStr)
+    return responseJson
 
 def processProvinceCode(addressInfo):
         global provinceCodeInfo
@@ -103,8 +115,7 @@ def processProvinceCode(addressInfo):
  ##把所有分散的市归好类
 def processingCity(addressList):
         
-        #addressJsonInfo = re.search(pattern=r'common_cityMap = .+return common_cityMap',string=addressList)
-        #ProvinceCode = {}
+      
         cityInfo = getCity(addressList)
         
         for x,y in cityInfo.items():
@@ -136,23 +147,58 @@ def analyseHtmlSource():
     processProvinceCode(addressInfo)
     processingCity(addressList)
     
-    for x,y in provinceMergeInfo.items():
-        print("省ID:"),
-        print(x),
-        print(" 省名称是:"),
-        print(y['provinceName']+' | ')
-        for x1 in y['city']:
-            print("      "),
-            print(x1['cityName']),
-            print('-'),
-            print(x1['code'])
-        print("\n")
-    
-    ##循环省份名称和代码
+    #循环省份名称和代码
     ##然后,可以配合循环,去查询,看看对应的这个地方有没有货
         
     ##打印完省份之后,打印城市,而且是对应省份
     
+    def queryCommodityNum():
+        print("请输入对应省份的ID:")
+        i = 1
+        for x,y in provinceMergeInfo.items():
+            if i==7:
+                print("")
+                i=1
+            print(x+"--"),
+            print(y['provinceName']+"  "),
+            i+=1
+        
+        enter = True
+        while enter: 
+            province = raw_input("请输入省份ID:")
+            print(type(province))
+            if province not in provinceMergeInfo.keys():
+                print('无法找到,请重新输入')
+            else:
+                enter = False
+                
+            
+            #首先选择省份
+            print("省ID:"),
+            print(province),
+            print(" 省名称是:"),
+            print(provinceMergeInfo[province]['provinceName']+' | ')
+            for x1 in provinceMergeInfo[province]['city']:
+                print("      "),
+                print(x1['cityName']),
+                print('-'),
+                print(x1['code'])
+                countryInfo = getCountry(x1['code'])
+                for x in countryInfo:
+                    print("      "),
+                    print("      "),
+                    print(x['name'])
+                print("")
+                
+            print("\n")
+            
+    
+    #这里应该多设置一个参数,就是接受外部参数,输入之后搜索,
+    queryCommodityNum()
+    
+    #countryInfo = getCountry(1)
+    #for x in countryInfo:
+    #   print(x['name'])
     
 def main():
     ##打开前先检查
@@ -168,3 +214,5 @@ if __name__ == "__main__":
     
 ##找出所有的省份
 #analyseHtmlSource()
+
+
