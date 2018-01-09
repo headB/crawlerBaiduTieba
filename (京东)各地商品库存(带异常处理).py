@@ -89,34 +89,47 @@ def getCity(stringInput,reStr='common_cityMap.+?common_cityMap'):
         
         
 def analyseHtmlSource():
-    #print(htmlResponse)
-    #print(type(htmlResponse.decode("utf-8")))
-    
-    #这里居然是因为输入的不是unicode而出问题,不过本来京东的页面是gbk的.
-    ##这里就踩坑了.!!!
     
     htmlFormat = etree.HTML(htmlResponse.decode("utf-8"))
     addressInfo = htmlFormat.xpath("//div[@class='address-tab J-address-tab ETab']/div/div[@data-level='0']/li")
     
-    #原来json并不是json格式的.
-    #addressFormat = etree.HTML(addressList)
-    #secondAddress = addressFormat.xpath('')
     
-    ##尝试转换json格式
-    
-    #addressJsonInfo = re.search(pattern=r'common_cityMap = .+return common_cityMap',string=addressList)
-    cityInfo = getCity(addressList)
-    for x,y in cityInfo.items():
-        print(x),
-        print(y)
-    
-    
-    ##循环省份名称和代码
-    ##然后,可以配合循环,去查询,看看对应的这个地方有没有货
     for x in addressInfo:
         y = x.xpath("./a/text()")
         print(y[0]),
         
+        y1 = x.xpath("./@data-value")
+        print(y1[0])
+    
+    
+    def processingCity(addressList):
+        
+        #addressJsonInfo = re.search(pattern=r'common_cityMap = .+return common_cityMap',string=addressList)
+        ProvinceCode = {}
+        cityInfo = getCity(addressList)
+        for x,y in cityInfo.items():
+            
+            cityCode = y.split("|")
+           
+            if cityCode[0] in ProvinceCode:
+                ProvinceCode[cityCode[0]].update({cityCode[1]:x})
+            else:
+                ProvinceCode[cityCode[0]] = {cityCode[1]:x}
+        for x,y in ProvinceCode.items():
+            print(x),
+            for x1,x2 in y.items():
+                print(x2),
+            print("")
+    
+    
+    processingCity(addressList)
+    
+    ##循环省份名称和代码
+    ##然后,可以配合循环,去查询,看看对应的这个地方有没有货
+    
+    
+    
+   
     
         
     ##打印完省份之后,打印城市,而且是对应省份
@@ -130,6 +143,8 @@ def main():
 if __name__ == "__main__":
     
     main()
+    
+    
     
 ##找出所有的省份
 #analyseHtmlSource()
