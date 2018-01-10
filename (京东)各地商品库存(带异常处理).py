@@ -247,6 +247,7 @@ def analyseHtmlSource():
                 returnCommodityJson = RCJ['stock']
                 print("供应商:"+returnCommodityJson['self_D']['vender'].encode("utf-8"))
                 print("配送:"+returnCommodityJson['serviceInfo'].encode("utf-8"))
+                print("商品现时状态:"+returnCommodityJson['stockDesc'].encode("utf-8"))
                 print("配送到"+returnCommodityJson['area']['provinceName'].encode("utf-8")+returnCommodityJson['area']['cityName'].encode("utf-8")
                 +returnCommodityJson['area']['countyName'].encode("utf-8")+returnCommodityJson['area']['townName'].encode("utf-8"))
                 print(returnCommodityJson['promiseResult'].encode("utf-8"))
@@ -257,20 +258,21 @@ def analyseHtmlSource():
                 townDict = analyseCountry(getCountry(country))
                 
                 ##如果不想循环的话,把这里的循环取消就可以了.
-                for x in townDict['countryS']:
-                    #print("镇")
-                    
-                
-                
-                    town = x
-                    commodityInfo = {}
-                    queryStrAddr = ''
-                    queryStrAddr = province+"_"+city+"_"+str(country)        
-                    print("xx")
-                    if town:
-                        queryStrAddr += '_'+str(town)
+                #print(dir(townDict))
+                if "__getitem__"  in  dir(townDict):
+                    for x in townDict['countryS']:
+                        
+                        town = x
+                        commodityInfo = {}
+                        queryStrAddr = ''
+                        queryStrAddr = province+"_"+city+"_"+str(country)        
+                        print("xx")
+                        if town:
+                            queryStrAddr += '_'+str(town)
+                        queryCommodityStatus(queryStrAddr)
+                else:
+                    queryStrAddr = province+"_"+city+"_"+str(country)
                     queryCommodityStatus(queryStrAddr)
-
                 ##获取各级的信息之后,就可以获取指定的商品的信息
 
                 #queryCommodityStatus()
@@ -309,6 +311,8 @@ if __name__ == "__main__":
     
 ##找出所有的省份
 #analyseHtmlSource()
+
+
 
 
 
