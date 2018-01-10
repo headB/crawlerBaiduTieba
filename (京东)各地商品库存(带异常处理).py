@@ -159,124 +159,141 @@ def analyseHtmlSource():
     
     def queryCommodityNum():
         global returnCommodityInfo
-        province = ''
-        country = ''
-        town = ''
-        
-        print("请输入对应省份的ID:")
-        i = 1
-        for x,y in provinceMergeInfo.items():
-            if i==7:
-                print("")
-                i=1
-            print(x+"--"),
-            print(y['provinceName']+"  "),
-            i+=1
-        
-        enter = True
-        while enter: 
-            province = raw_input("\n请输入省份ID:")
-            if province not in provinceMergeInfo.keys():
-                print('无法找到,请重新输入')
-            else:
-                enter = False
-            print("==================================================")
-            i1 = 1
-            cityS = {}
-            for x in provinceMergeInfo[province]['city']:
-                    print(x['cityName']+"--"),
-                    print(x['code']+'  '),
-                    cityS[x['code']] = x['cityName']
-                    if i1 ==5:
-                        print("")
-                        i1=1
-                    i1+=1
-                    enter = True
-            
-            while enter:
-                    city = raw_input("\n请选择输入一个城市ID:")
-                    if city in cityS.keys():
-                        enter = False
-                    else:
-                        print("不正确,请重新输入")
-                    print("========================================")
-            countryInfo = getCountry(city)
-            if countryInfo:
-                countryS = {}
-                for x in countryInfo:
-                    print(x['name']+"--"),
-                    print(x['id'])
-                    countryS[x['id']] = x['name']
+        #province = ''
+        #country = ''
+        #town = ''
+        name=''
+        #优化
+        ##这个函数专门用于解析本地JS缓存的省和城市的归属
+        def queryInfo(tips,steps,showVars,secondShowVars=False):
+                global provinceMergeInfo
+                variables = provinceMergeInfo
+                items = {}
+                i = 1
+                
+                if not secondShowVars:
+                    for x,y in variables.items():
+                        print(x+"--"),
+                        print(y[showVars]+"  "),
+                        items[x] = y[showVars]
+                        if i==int(steps):
+                            print("")
+                            i = 1
+                        i+= 1
+                else:
+                        for x in provinceMergeInfo[province]['city']:
+                                print(x['cityName']+"--"),
+                                print(x['code']+'  '),
+                                items[x['code']] = x['cityName'],
+                                if i==int(steps):
+                                    print("")
+                                    i = 1
+                                i+= 1
+                    
                 enter = True
-                #print("\n请选择一个ID输入:")
                 while enter:
-                    country = raw_input("\n请选择一个ID输入:")
-                    if int(country) in countryS.keys():
-                        enter = False
+                    item = raw_input(tips)
+                    if item not in items.keys():
+                        print("错误!请重新"+tips)
                     else:
-                        print("不正确,请重新输入")
-                    print("========================================")
-                townInfo = getCountry(country)
-                if townInfo:
-                    townInfoS = {}
-                    for x in townInfo:
-                        print(x['name']+'--'),
+                        enter = False
+                        print("===========================================================")
+                globalVariables = item
+                return item
+            
+        def analyseCountry(countryInfo):
+            if countryInfo:
+                    countryS = {}
+                    for x in countryInfo:
+                        print(x['name']+"--"),
                         print(x['id'])
-                        townInfoS[x['id']] = x['name']
-                        
+                        countryS[x['id']] = x['name']
                     enter = True
+                    #print("\n请选择一个ID输入:")
                     while enter:
-                        town = raw_input("请输入一个ID:")
-                        if int(town) in townInfoS.keys():
+                        country = raw_input("\n请选择一个ID输入:")
+                        if int(country) in countryS.keys():
                             enter = False
                         else:
-                             print("不正确,请重新输入")
+                            print("不正确,请重新输入")
                         print("========================================")
-                        
-                        print("this is code")
-                        
-                        
-                    commodityInfo = {}
+                    returnInfo = {}
+                    returnInfo['country'] = int(country)
+                    returnInfo['countryS'] = countryS
+                    return returnInfo
+                
+        def queryCommodityStatus(queryStrAddr):
+            
+            url = "https://c0.3.cn/stock?skuId=1378536&area="+queryStrAddr+"&venderId=1000000127&cat=670,671,672&buyNum=1&choseSuitSkuIds=&extraParam={%22originid%22:%221%22}&ch=1&fqsp=0&pduid=14951566389341617979946&pdpin=jd_5835d8182bb8f&detailedAdd=null&callback=jQuery2843463"
+
+            response = requests.get(url)
+            print(url)
+            #print(response.text)
+            returnCommodityInfo = response
+
+            info = re.search(pattern=u"有货",string=response.text)
+
+            if "group" in dir(info):
+                print("有货,赶紧买")
+            else:
+                print("唔好意思,该地区冇货,有钱都冇用")
+
+            #将前面获取到的信息设置一下格式,然后再打印
+
+            returnCommodityJsonStr = re.search(pattern="\{.+\}",string=returnCommodityInfo.text)
+            if "group" in dir(returnCommodityJsonStr):
+                returnCommodityJson = json.loads(returnCommodityJsonStr.group())
+                RCJ,returnCommodityJson = returnCommodityJson,''
+                returnCommodityJson = RCJ['stock']
+                print("供应商:"+returnCommodityJson['self_D']['vender'].encode("utf-8"))
+                print("配送:"+returnCommodityJson['serviceInfo'].encode("utf-8"))
+                print("配送到"+returnCommodityJson['area']['provinceName'].encode("utf-8")+returnCommodityJson['area']['cityName'].encode("utf-8")
+                +returnCommodityJson['area']['countyName'].encode("utf-8")+returnCommodityJson['area']['townName'].encode("utf-8"))
+                print(returnCommodityJson['promiseResult'].encode("utf-8"))
+            
+        def loopTownInfo():
+                #print(x)
+                country = countryDict['country']
+                townDict = analyseCountry(getCountry(country))
+                
+                ##如果不想循环的话,把这里的循环取消就可以了.
+                for x in townDict['countryS']:
+                    #print("镇")
                     
-        queryStrAddr = province+"_"+city+"_"+country        
-        print("xx")
-        if town:
-            queryStrAddr += '_'+town
+                
+                
+                    town = x
+                    commodityInfo = {}
+                    queryStrAddr = ''
+                    queryStrAddr = province+"_"+city+"_"+str(country)        
+                    print("xx")
+                    if town:
+                        queryStrAddr += '_'+str(town)
+                    queryCommodityStatus(queryStrAddr)
+
+                ##获取各级的信息之后,就可以获取指定的商品的信息
+
+                #queryCommodityStatus()
             
-        
-        url = "https://c0.3.cn/stock?skuId=1378536&area="+queryStrAddr+"&venderId=1000000127&cat=670,671,672&buyNum=1&choseSuitSkuIds=&extraParam={%22originid%22:%221%22}&ch=1&fqsp=0&pduid=14951566389341617979946&pdpin=jd_5835d8182bb8f&detailedAdd=null&callback=jQuery2843463"
-        
-        response = requests.get(url)
-        #print(response.text)
-        returnCommodityInfo = response
-        
-        info = re.search(pattern=u"有货",string=response.text)
-        
-        if "group" in dir(info):
-            print("有货,赶紧买")
-        else:
-            print("唔好意思,该地区冇货,有钱都冇用")
             
-        #将前面获取到的信息设置一下格式,然后再打印
-        
-        returnCommodityJsonStr = re.search(pattern="\{.+\}",string=returnCommodityInfo.text)
-        if "group" in dir(returnCommodityJsonStr):
-            returnCommodityJson = json.loads(returnCommodityJsonStr.group())
-            RCJ,returnCommodityJson = returnCommodityJson,''
-            returnCommodityJson = RCJ['stock']
-            print("供应商:"+returnCommodityJson['self_D']['vender'].encode("utf-8"))
-            print("配送:"+returnCommodityJson['serviceInfo'].encode("utf-8"))
-            print("配送到"+returnCommodityJson['area']['provinceName'].encode("utf-8")+returnCommodityJson['area']['cityName'].encode("utf-8")
-            +returnCommodityJson['area']['countyName'].encode("utf-8")+returnCommodityJson['area']['townName'].encode("utf-8"))
-            print(returnCommodityJson['promiseResult'].encode("utf-8"))
             
+       ##相当于,这里才是程序的开始          
+        province = queryInfo("请根据信息提示输入你想看的省份ID:",'5',"provinceName")
+        city = queryInfo("请根据信息提示输入你想看的城市ID:",'5',"city","xx")
+        countryDict = analyseCountry(getCountry(city))
+        loopTownInfo()
         
+    
     #这里应该多设置一个参数,就是接受外部参数,输入之后搜索,
     queryCommodityNum()
     
     #countryInfo = getCountry(1)
     #for x in countryInfo:
     #   print(x['name'])
+    
+    
+
+
     
 def main():
     ##打开前先检查
@@ -292,6 +309,7 @@ if __name__ == "__main__":
     
 ##找出所有的省份
 #analyseHtmlSource()
+
 
 
 
