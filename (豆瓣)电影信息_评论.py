@@ -64,6 +64,9 @@ IDs = formatRes()
 #name = input("请输入你想查询的影评的电影名:")
 
 
+#name = input("请输入你想查询的影评的电影名:")
+
+
 def getResponse():
     url = "https://movie.douban.com/subject/%s"%IDs
     response = requests.get(url=url,headers=ua)
@@ -71,9 +74,16 @@ def getResponse():
 
 def analyseHtml():
     response = etree.HTML(responseText)
-    fileInfo = response.xpath("//div[contain,'']")
+    fileInfo = response.xpath("//div[contains(@class,'subject')]")
+    for x1 in fileInfo:
+        fileInfo1 = x1.xpath("string(.)")
+        print(fileInfo1)
+        #print(fileInfo1.encode('utf-8'))
+    #print(fileInfo.xpath("string(.)"))
 
 responseText = getResponse()
+analyseHtml()
+
 
 
     
