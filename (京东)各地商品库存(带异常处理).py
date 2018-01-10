@@ -243,21 +243,33 @@ def analyseHtmlSource():
         if town:
             queryStrAddr += '_'+town
             
-        print(queryStrAddr)
         
         url = "https://c0.3.cn/stock?skuId=1378536&area="+queryStrAddr+"&venderId=1000000127&cat=670,671,672&buyNum=1&choseSuitSkuIds=&extraParam={%22originid%22:%221%22}&ch=1&fqsp=0&pduid=14951566389341617979946&pdpin=jd_5835d8182bb8f&detailedAdd=null&callback=jQuery2843463"
-        print(url)
         
         response = requests.get(url)
         #print(response.text)
         returnCommodityInfo = response
         
         info = re.search(pattern=u"有货",string=response.text)
-        print(response.text)
+        
         if "group" in dir(info):
             print("有货,赶紧买")
         else:
             print("唔好意思,该地区冇货,有钱都冇用")
+            
+        #将前面获取到的信息设置一下格式,然后再打印
+        
+        returnCommodityJsonStr = re.search(pattern="\{.+\}",string=returnCommodityInfo.text)
+        if "group" in dir(returnCommodityJsonStr):
+            returnCommodityJson = json.loads(returnCommodityJsonStr.group())
+            RCJ,returnCommodityJson = returnCommodityJson,''
+            returnCommodityJson = RCJ['stock']
+            print("供应商:"+returnCommodityJson['self_D']['vender'].encode("utf-8"))
+            print("配送:"+returnCommodityJson['serviceInfo'].encode("utf-8"))
+            print("配送到"+returnCommodityJson['area']['provinceName'].encode("utf-8")+returnCommodityJson['area']['cityName'].encode("utf-8")
+            +returnCommodityJson['area']['townName'].encode("utf-8")+returnCommodityJson['area']['countyName'].encode("utf-8"))
+            print(returnCommodityJson['promiseResult'].encode("utf-8"))
+            
         
     #这里应该多设置一个参数,就是接受外部参数,输入之后搜索,
     queryCommodityNum()
@@ -280,5 +292,6 @@ if __name__ == "__main__":
     
 ##找出所有的省份
 #analyseHtmlSource()
+
 
 
