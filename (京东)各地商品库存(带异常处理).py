@@ -267,7 +267,7 @@ def analyseHtmlSource():
             print("供应商:"+returnCommodityJson['self_D']['vender'].encode("utf-8"))
             print("配送:"+returnCommodityJson['serviceInfo'].encode("utf-8"))
             print("配送到"+returnCommodityJson['area']['provinceName'].encode("utf-8")+returnCommodityJson['area']['cityName'].encode("utf-8")
-            +returnCommodityJson['area']['townName'].encode("utf-8")+returnCommodityJson['area']['countyName'].encode("utf-8"))
+            +returnCommodityJson['area']['countyName'].encode("utf-8")+returnCommodityJson['area']['townName'].encode("utf-8"))
             print(returnCommodityJson['promiseResult'].encode("utf-8"))
             
         
@@ -292,6 +292,8 @@ if __name__ == "__main__":
     
 ##找出所有的省份
 #analyseHtmlSource()
+
+
 
 
 
