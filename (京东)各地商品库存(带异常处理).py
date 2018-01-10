@@ -13,6 +13,9 @@ addressList = ''
 provinceMergeInfo = {}
 provinceCodeInfo = {}
 
+#测试用的变量测试,这个是保存返回来的商品参数.
+returnCommodityInfo = ''
+
 
 def getHtmlSource():
     
@@ -141,7 +144,7 @@ def processingCity(addressList):
         
         
 def analyseHtmlSource():
-    
+    #global returnCommodityInfo
     htmlFormat = etree.HTML(htmlResponse.decode("utf-8"))
     addressInfo = htmlFormat.xpath("//div[@class='address-tab J-address-tab ETab']/div/div[@data-level='0']/li")
     
@@ -155,7 +158,7 @@ def analyseHtmlSource():
     ##打印完省份之后,打印城市,而且是对应省份
     
     def queryCommodityNum():
-        
+        global returnCommodityInfo
         province = ''
         country = ''
         town = ''
@@ -242,14 +245,15 @@ def analyseHtmlSource():
             
         print(queryStrAddr)
         
-        url = "https://c0.3.cn/stock?skuId=5225346&area="+queryStrAddr+"&venderId=1000000127&cat=670,671,672&buyNum=1&choseSuitSkuIds=&extraParam={%22originid%22:%221%22}&ch=1&fqsp=0&pduid=14951566389341617979946&pdpin=jd_5835d8182bb8f&detailedAdd=null&callback=jQuery2843463"
+        url = "https://c0.3.cn/stock?skuId=1378536&area="+queryStrAddr+"&venderId=1000000127&cat=670,671,672&buyNum=1&choseSuitSkuIds=&extraParam={%22originid%22:%221%22}&ch=1&fqsp=0&pduid=14951566389341617979946&pdpin=jd_5835d8182bb8f&detailedAdd=null&callback=jQuery2843463"
         print(url)
         
         response = requests.get(url)
         #print(response.text)
+        returnCommodityInfo = response
         
-        info = re.search(pattern="有货",string=response.text)
-        
+        info = re.search(pattern=u"有货",string=response.text)
+        print(response.text)
         if "group" in dir(info):
             print("有货,赶紧买")
         else:
@@ -276,7 +280,5 @@ if __name__ == "__main__":
     
 ##找出所有的省份
 #analyseHtmlSource()
-
-
 
 
