@@ -8,6 +8,7 @@ url = 'https://movie.douban.com/subject_search'
 ua = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36"}
 
 ##ajax的形式想检查电影名
+##但是有个问题,就是
 def queryAjax(): 
     enter = True
     while enter:
@@ -32,39 +33,25 @@ def queryAjax():
         else:
             print("没有找到,请你重新输入:")
             
+def queryGet():
+    ##普通的get方法已经不好使了.!
+    while True:
+        name = raw_input("请输入你想查找的电影名:")
+        if name:
+            url = "https://movie.douban.com/subject_search?search_text=%s&cat=1002"%name
+            #url = 'https://item.jd.com/4161503.html'
+            #response = requests.get(url,ua)
+            browser = webdriver.PhantomJS()
+            response = browser.get(url)
+            print(dir(response))
+            print(browser.page_source)
+            
+            break
             
             
-responseInfo = queryAjax()
-##格式化ajax获取到的结果
-def formatRes():
-    #print(responseInfo)
-    listId = []
-    print("搜索结果:请输入其中一个你想看的,输入名字:")
-    RJ = json.loads(responseInfo)
-    for x in RJ:
-        print("具体的ID名:"+x['id']+"---",end='')
-        print("名字:"+x['title']+'---',end='')
-        print("别名:"+x['sub_title']+'----',end='')
-        print("类型:"+x['type'],)
-        print(x['img'])
-        print("")
-        listId.append(x['id'])
-    
-    enter = True
-    while enter:
-        Id = input("请输入ID:")
-        if Id not in listId:
-            print("错误!")
-        else:
-            enter = False
-        
-    return Id
-IDs = formatRes()
+#responseInfo = queryAjax()
+queryGet()
 
-#name = input("请输入你想查询的影评的电影名:")
-
-
-#name = input("请输入你想查询的影评的电影名:")
 
 
 def getResponse():
