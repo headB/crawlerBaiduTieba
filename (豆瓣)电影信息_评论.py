@@ -66,6 +66,7 @@ response = queryGet()
 
 
 #name = input("请输入你想查询的影评的电影名:")
+#name = input("请输入你想查询的影评的电影名:")
 
 
 def getResponse(IDs):
@@ -75,10 +76,27 @@ def getResponse(IDs):
 
 def analyseHtml(responseText):
     response = etree.HTML(responseText)
-    fileInfo = response.xpath("//div[contains(@class,'subject')]")
-    for x1 in fileInfo:
-        fileInfo1 = x1.xpath("string(.)")
-        print(fileInfo1)
+    print(response.xpath("//title")[0].text)
+    fileInfo = response.xpath("//div[contains(@class,'subject')]/div[contains(@id,'info')]")
+    print(fileInfo[0].xpath("string(.)"))
+    fileInfo1 = response.xpath("//div[contains(@class,'subject')]/div[contains(@id,'interest_sectl')]")
+    stars = fileInfo1[0].xpath("div/div/strong[@class='ll rating_num']")
+    #print(len(stars))
+    if stars[0].text:
+        print("这个电影的评分是:",end='')
+        print(stars[0].text)
+    else:
+        print("暂时没有评分!")
+    #fileInfo1 = response.xpath("")
+    filmPlot = response.xpath("//div[@id='link-report']//span[@class='all hidden']")
+    print(len(filmPlot))
+    if len(filmPlot):
+        print("剧情介绍:",end='')
+        #rint(filmPlot.xpath("string(.)"))
+        print(filmPlot[0].xpath("string(.)").strip())
+        print("")
+    else:
+        print("暂时没有剧情介绍")
 
 
 ##格式化ajax获取到的结果
@@ -87,8 +105,12 @@ def analyseHtml(responseText):
 
 
 def searchInfoFormat(responseText):
+    list1 = []
     response = etree.HTML(responseText)
     searchInfos = response.xpath("//div[@class='sc-dnqmqq eXEXeG']/div[contains(@class,'sc')]")
+    
+    ##在这里设置一下倒叙先,因为,现在看的顺序是从下往上的.
+    searchInfos.reverse()
     for x in searchInfos:
         IDs = x.xpath("div['item-root']/a/@href")
         print("这个电影的ID是:",end='')
@@ -96,6 +118,8 @@ def searchInfoFormat(responseText):
         print(x.xpath("string(.)"))
         print(x.xpath("div['item-root']/a/img/@src")[0])
         print('\n')
+        list1.append(IDs[0])
+    return list1
         
 def formatRes():
     #print(responseInfo)
@@ -108,7 +132,7 @@ def formatRes():
         print("别名:"+x['sub_title']+'----',end='')
         print("类型:"+x['type'],)
         print(x['img'])
-        
+    
         
         
         print("")
@@ -125,11 +149,25 @@ def formatRes():
     return Id
 #IDs = formatRes()
 
+##这里定义一个输入,就是选择ID,
+def selectIDToView(response):
+        filmLink = searchInfoFormat(response)
+        while True:
+            linkId = input("请选择一个ID输入:")
+            if linkId:
+                url = "https://movie.douban.com/subject/"+linkId+"/"
+                if url in filmLink:
+                    return linkId
+                else:
+                    print("输入不正确,请重新输入")
+                
+            
 
+#filmLink = searchInfoFormat(response)
+IDs = selectIDToView(response)
+responseText = getResponse(IDs)
+info = analyseHtml(responseText)
 
-
-
-searchInfoFormat(response)
     
 
 
