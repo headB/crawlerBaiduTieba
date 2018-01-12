@@ -96,7 +96,10 @@ def analyseHtml(responseText):
         print(filmPlot[0].xpath("string(.)").strip())
         print("")
     else:
-        print("暂时没有剧情介绍")
+        filmPlot = response.xpath("//div[@id='link-report']//span[@property='v:summary']")
+        print(filmPlot[0].xpath("string(.)").strip())
+        if not len(filmPlot):
+            print("暂时没有剧情介绍")
 
 
 ##格式化ajax获取到的结果
