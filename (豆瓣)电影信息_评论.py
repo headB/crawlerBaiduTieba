@@ -36,41 +36,101 @@ def queryAjax():
 def queryGet():
     ##普通的get方法已经不好使了.!
     while True:
-        name = raw_input("请输入你想查找的电影名:")
+        name = input("请输入你想查找的电影名:")
         if name:
+            
+            #居然要我格式化???随便啦.差不多啦.~!!!
+            
+            name = urllib.parse.quote(name)
+            print(name)
             url = "https://movie.douban.com/subject_search?search_text=%s&cat=1002"%name
+            
+            #sys.exit(0)
+            
             #url = 'https://item.jd.com/4161503.html'
             #response = requests.get(url,ua)
+            
+            ##由于假如真的要去研究不用phantomJS的话,要耗费太多的时间了,所以还是采用phantomJS
             browser = webdriver.PhantomJS()
             response = browser.get(url)
-            print(dir(response))
+            browser.save_screenshot("htmlSource/douban_screen.png")
+            #print(dir(response))
             print(browser.page_source)
-            
-            break
+            return browser.page_source
+        else:
+            print("请重新输入:")
             
             
 #responseInfo = queryAjax()
-queryGet()
+response = queryGet()
 
 
+#name = input("请输入你想查询的影评的电影名:")
 
-def getResponse():
+
+def getResponse(IDs):
     url = "https://movie.douban.com/subject/%s"%IDs
     response = requests.get(url=url,headers=ua)
     return response.text
 
-def analyseHtml():
+def analyseHtml(responseText):
     response = etree.HTML(responseText)
     fileInfo = response.xpath("//div[contains(@class,'subject')]")
     for x1 in fileInfo:
         fileInfo1 = x1.xpath("string(.)")
         print(fileInfo1)
-        #print(fileInfo1.encode('utf-8'))
-    #print(fileInfo.xpath("string(.)"))
 
-responseText = getResponse()
-analyseHtml()
 
+##格式化ajax获取到的结果
+
+##这个位置得重新修改!!因为之前的是ajax返回的结果,但是我发现,有很多地方还是不如queryGet的.所以现在改装一下.
+
+
+def searchInfoFormat(responseText):
+    response = etree.HTML(responseText)
+    searchInfos = response.xpath("//div[@class='sc-dnqmqq eXEXeG']/div[contains(@class,'sc')]")
+    for x in searchInfos:
+        IDs = x.xpath("div['item-root']/a/@href")
+        print("这个电影的ID是:",end='')
+        print(re.search(pattern='\d+',string=IDs[0]).group())
+        print(x.xpath("string(.)"))
+        print(x.xpath("div['item-root']/a/img/@src")[0])
+        print('\n')
+        
+def formatRes():
+    #print(responseInfo)
+    listId = []
+    print("搜索结果:请输入其中一个你想看的,输入名字:")
+    RJ = json.loads(responseInfo)
+    for x in RJ:
+        print("具体的ID名:"+x['id']+"---",end='')
+        print("名字:"+x['title']+'---',end='')
+        print("别名:"+x['sub_title']+'----',end='')
+        print("类型:"+x['type'],)
+        print(x['img'])
+        
+        
+        
+        print("")
+        listId.append(x['id'])
+    
+    enter = True
+    while enter:
+        Id = input("请输入ID:")
+        if Id not in listId:
+            print("错误!")
+        else:
+            enter = False
+        
+    return Id
+#IDs = formatRes()
+
+
+
+
+
+searchInfoFormat(response)
+    
 
 
     
