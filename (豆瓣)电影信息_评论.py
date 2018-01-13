@@ -171,6 +171,110 @@ IDs = selectIDToView(response)
 responseText = getResponse(IDs)
 info = analyseHtml(responseText)
 
+##分析这个页面有没有分页
+def analyseMorePage(response):
+    responseText = etree.HTML(response)
+    pagesExist = responseText.xpath("//div[@class='paginator']/span[@class='count']")
+    if len(pagesExist):
+        pageNum = pagesExist[0].text
+        #print(pageNum)
+        pageNum = re.search(pattern='\d+',string=pageNum).group()
+        return pageNum
+    else:
+        return False
+
+def analyseEveryPage(url):
+    response = requests.get(url)
+    #print(response.text)
+    
+##查看每一个ID的详细评论页面
+def getDetailReview(ID):
+    url = "https://movie.douban.com/j/review/%s/full"%ID
+    response = requests.get(url)
+    #print(response.text)
+    responseJson = json.loads(response.text)
+    print(responseJson['html'])
+    return responseJson['html']
+    
+    ##统计一下看看有多少个评论者的原始ID，并且返回这些ID的值，以待处理。
+def getAllReviewByResposne(response):
+    response = etree.HTML(response)
+    reviewID = response.xpath("//div[@class='review-list  ']/div/@data-cid")
+    IDSInfo = []
+    for x in reviewID:
+        IDSInfo.append(x)
+    return IDSInfo
+
+def saveInfoInFile(resource,name):
+    try:
+        with open("htmlSource/"+name,'w') as file1:
+            file1.write(resource)
+    except:
+        print("写入文件错误！！")
+
+##找到这个电影的评论页面,
+def getFilmReview(IDs):
+    url = "https://movie.douban.com/subject/%s/reviews"%IDs
+    #browser = webdriver.PhantomJS()
+    #browser.get(url)
+    
+    #browser.save_screenshot("htmlSource/doubanReview.png")
+    
+    #response = browser.page_source
+    
+    ##不管这个评论页有没有其他分页，都去首先姐系评论的首页。
+    ##然后顺便设置一个字典，用于接收所有评论者的详细文本内容
+    allReviewerInfo = {}
+    allReviewerInfo['content'] = []
+    response = requests.get(url).text
+    reviewIds = getAllReviewByResposne(response)
+    print(reviewIds)
+    for x in reviewIds:
+        y = getDetailReview(x)
+        if len(y):
+            allReviewerInfo['content'].append(y)
+    
+    #查询看看有没有其他的分页
+    pageNum = analyseMorePage(response)
+    if  (int(pageNum)%20):
+        pageNum = int(pageNum)//20 + 1
+    else:
+        pageNum = int(pageNum)/20
+    
+    #print("可以分成多少页:",end='')
+    #print(pageNum)
+    
+    ##如果上面分析到有分页的话，就可以到分页获取评论
+    analyseEveryPage(url)
+    if pageNum > 0:
+        for x in  range(1,pageNum+1):
+            time.sleep(2)
+            print("在处理第%s页"%x)
+            y = x*20
+            url1 = url+"?start="+str(y)
+            response = requests.get(url1)
+            print(url1)
+            print(response)
+            ##上面获取到内容之后，然后就逐个ID获取完整评论了
+            reviewIds = getAllReviewByResposne(response.text)
+            print(reviewIds)
+            for x in reviewIds:
+                y1 = getDetailReview(x)
+                if len(y1):
+                    allReviewerInfo['content'].append(y1)
+            
+        contentJson = json.dumps(allReviewerInfo)
+        saveInfoInFile(contentJson,'yingyanReview.json')
+
+getFilmReview(IDs)
+
+
+
+#getDetailReview("1583743")
+    
+#responseText = getResponse(IDs)
+#analyseHtml(responseText)
+
     
 
 
