@@ -49,14 +49,21 @@ def getSearchJob(word):
     response = requests.get(url,headers=UA)
     return response.content.decode("utf-8")
 
+def analyseJobsByUrls(urls):
+    for x in urls:
+        pass
 
 
-def analyseJobsInfo(infoArray):
+def analyseJobsInfoByHtml(infoArray):
     html = etree.HTML(infoArray)
     info = html.xpath("//div[@id='newlist_list_content_table']")
-    infos = info[0].xpath("string(.)")
-    print(infos)
+    urlInfo = info[0].xpath("table/tr/td/div/a")
+    for x in urlInfo:
+        x1 = x.xpath("string(.)")
+        print(x1,end='')
+        x2 = x.xpath("@href")
+        print(x2)
     
 searchInfo = getSearchJob("python开发工程师")
 
-info = analyseJobsInfo(searchInfo)
+info = analyseJobsInfoByHtml(searchInfo)
