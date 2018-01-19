@@ -4,6 +4,7 @@ import urllib
 from selenium import webdriver
 import re
 import json
+from lxml import  etree
 
 ##OK !!尝试直接用requests捉取首页.
 def getSiteIndex():
@@ -48,4 +49,14 @@ def getSearchJob(word):
     response = requests.get(url,headers=UA)
     return response.content.decode("utf-8")
 
-print(getSearchJob("python开发工程师"))
+
+
+def analyseJobsInfo(infoArray):
+    html = etree.HTML(infoArray)
+    info = html.xpath("//div[@id='newlist_list_content_table']")
+    infos = info[0].xpath("string(.)")
+    print(infos)
+    
+searchInfo = getSearchJob("python开发工程师")
+
+info = analyseJobsInfo(searchInfo)
