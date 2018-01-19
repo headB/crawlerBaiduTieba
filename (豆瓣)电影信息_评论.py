@@ -214,16 +214,12 @@ def saveInfoInFile(resource,name):
 
 ##找到这个电影的评论页面,
 def getFilmReview(IDs):
+    while True:
+        name = input("请你输入准备用于保存评论文件json的文件名：")
+        if name:
+            break
     url = "https://movie.douban.com/subject/%s/reviews"%IDs
-    #browser = webdriver.PhantomJS()
-    #browser.get(url)
     
-    #browser.save_screenshot("htmlSource/doubanReview.png")
-    
-    #response = browser.page_source
-    
-    ##不管这个评论页有没有其他分页，都去首先姐系评论的首页。
-    ##然后顺便设置一个字典，用于接收所有评论者的详细文本内容
     allReviewerInfo = {}
     allReviewerInfo['content'] = []
     response = requests.get(url).text
@@ -246,8 +242,9 @@ def getFilmReview(IDs):
     
     ##如果上面分析到有分页的话，就可以到分页获取评论
     analyseEveryPage(url)
+    print(pageNum)
     if pageNum > 0:
-        for x in  range(1,pageNum+1):
+        for x in  range(1,int(pageNum+1)):
             time.sleep(2)
             print("在处理第%s页"%x)
             y = x*20
@@ -264,11 +261,9 @@ def getFilmReview(IDs):
                     allReviewerInfo['content'].append(y1)
             
         contentJson = json.dumps(allReviewerInfo)
-        saveInfoInFile(contentJson,'yingyanReview.json')
+    saveInfoInFile(contentJson,name)
 
 getFilmReview(IDs)
-
-
 
 #getDetailReview("1583743")
     
