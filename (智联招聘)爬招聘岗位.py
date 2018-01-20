@@ -42,8 +42,12 @@ if suggestWord:
 
 #def
 
-def getSearchJob(word):
-    word = urllib.parse.quote(word)
+def getSearchJob():
+    while True:
+        inputWord = input('请输入你想搜索的职业职')
+        if inputWord:
+            break
+    word = urllib.parse.quote(inputWord)
     url = "http://sou.zhaopin.com/jobs/searchresult.ashx?jl=&kw=%s"%word
     print(url)
     response = requests.get(url,headers=UA)
@@ -58,12 +62,19 @@ def analyseJobsInfoByHtml(infoArray):
     html = etree.HTML(infoArray)
     info = html.xpath("//div[@id='newlist_list_content_table']")
     urlInfo = info[0].xpath("table/tr/td/div/a")
+    links = []
     for x in urlInfo:
+        linksDict = {}
         x1 = x.xpath("string(.)")
         print(x1,end='')
+        linksDict.update({'jobName':x1})
         x2 = x.xpath("@href")
+        linksDict.update({'urlLink':x2})
         print(x2)
+        links.append(linksDict)
+    return links
     
-searchInfo = getSearchJob("python开发工程师")
+searchInfo = getSearchJob()
 
 info = analyseJobsInfoByHtml(searchInfo)
+
