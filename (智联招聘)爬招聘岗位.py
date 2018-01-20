@@ -78,3 +78,17 @@ searchInfo = getSearchJob()
 
 info = analyseJobsInfoByHtml(searchInfo)
 
+#===========================================================+
+#===========================================================
+def analyseUrlLinks(linksList):
+    for x in linksList:
+        respose = requests.get(x).content.decode("utf-8")
+        contentHTML = etree.HTML(respose)
+        content = contentHTML.xpath("//title")
+        print(content[0].text)
+        
+for x in info:
+    analyseUrlLinks(x['urlLink'])
+    
+ 
+
