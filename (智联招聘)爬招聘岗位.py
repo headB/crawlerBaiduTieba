@@ -80,15 +80,25 @@ info = analyseJobsInfoByHtml(searchInfo)
 
 #===========================================================+
 #===========================================================
+
+#def saveHtmlResposeContent(htmlRespose):
+    ##return 
+
+
 def analyseUrlLinks(linksList):
     for x in linksList:
         respose = requests.get(x).content.decode("utf-8")
         contentHTML = etree.HTML(respose)
         content = contentHTML.xpath("//title")
         print(content[0].text)
-        
+        #content.append(contentHTML)
+        return contentHTML
+urlLinkHtmlContent = []
 for x in info:
-    analyseUrlLinks(x['urlLink'])
+    x1 = analyseUrlLinks(x['urlLink'])
+    urlLinkHtmlContent.append(x1)
+    
+    
     
  
 
