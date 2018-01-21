@@ -140,3 +140,10 @@ for x in urlLinkHtmlContent:
 print(allJobsInfoList)
  
 ##============== the three part=================================
+##定义一个序列化的函数,用于保存刚刚捉取网页的信息,以便下次可以使用.
+def saveFile(htmlSource):
+    file1 = open('htmlSource/jobs.text','wb')
+    pickle.dump(htmlSource,file1)
+
+#print(allUrlHtmlSource)
+saveFile(allUrlHtmlSource)
