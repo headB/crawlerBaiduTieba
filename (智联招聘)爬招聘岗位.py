@@ -99,6 +99,36 @@ for x in info:
     urlLinkHtmlContent.append(x1)
     
     
+###########second-part##############################
+allJobsInfoList = []
+
+def replaceSpecially(x2):
+    x2 = re.sub(r"<.+>",'',x2)
+    x2 = re.sub(r" ",'',x2)
+    x2 = re.sub(r"\r\n",'',x2)
+    return x2
     
+for x in urlLinkHtmlContent:
+    jobsInfo = {}
+    x1 = x.xpath("//div[@class='terminalpage-left']/ul[@class='terminal-ul clearfix']")
+    x1_1 = x.xpath("//div[@class='terminalpage-main clearfix']//div[@class='tab-inner-cont']")
+    x2 = x1_1[0].xpath("string(.)")
+    x3 = x1_1[1].xpath("string(.)")
+    x2 = replaceSpecially(x2)
+    x3 = replaceSpecially(x3)
+    jobsName = x.xpath("//title/text()")
+    jobsDesc = x1[0].xpath("string(.)")
+    #print(jobsName[0])
+    #print(x2)
+    #print("")
+    #print(x3)
+    jobsInfo.update({'jobName':jobsName[0]})
+    jobsInfo.update({'jobDesc':jobsDesc})
+    jobsInfo.update({'jobDetail':x2})
+    jobsInfo.update({'companyDesc':x3})
+    #print(jobsDesc)
+    allJobsInfoList.append(jobsInfo)
+    
+print(allJobsInfoList)
  
 
