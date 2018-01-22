@@ -145,5 +145,14 @@ def saveFile(htmlSource):
     file1 = open('htmlSource/jobs.text','wb')
     pickle.dump(htmlSource,file1)
 
-#print(allUrlHtmlSource)
-saveFile(allUrlHtmlSource)
+
+#saveFile(allUrlHtmlSource)
+print(type(allUrlHtmlSource))
+
+##上面定义的是pickle模块的,下面尝试一下用json序列号.
+#def saveFileToJson(htmlSource):
+#    fileJson = json.dumps(allUrlHtmlSource)
+#    with open('htmlSource/jobs.json','w') as file1:
+#        file1.write(fileJson)
+        
+#saveFileToJson(allUrlHtmlSource)
