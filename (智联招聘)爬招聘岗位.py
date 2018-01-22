@@ -5,6 +5,7 @@ from selenium import webdriver
 import re
 import json
 from lxml import  etree
+import pickle
 
 ##OK !!尝试直接用requests捉取首页.
 def getSiteIndex():
