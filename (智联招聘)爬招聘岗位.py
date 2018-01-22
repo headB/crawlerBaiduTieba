@@ -6,6 +6,7 @@ import re
 import json
 from lxml import  etree
 import pickle
+from multiprocessing import Pool,Manager
 
 ##OK !!尝试直接用requests捉取首页.
 def getSiteIndex():
@@ -83,16 +84,15 @@ info = analyseJobsInfoByHtml(searchInfo)
 #===========================================================
 
 
+
 #def saveHtmlResposeContent(htmlRespose):
     ##return 
 def saveHtmlSource(htmlSource):
     pass
 
-
-def analyseUrlLinks(linksList):
+#使用requests获取的这个函数需要改装一下,
+def analyseUrlLinks(linksList,linkQueue):
     content = {}
-    #content['htmlSource'] = []
-    #content['etreeHtml'] = []
     for x in linksList:
         respose = requests.get(x).content.decode("utf-8")
         contentHTML = etree.HTML(respose)
@@ -100,12 +100,25 @@ def analyseUrlLinks(linksList):
         print(content1[0].text)
         content['htmlSource'] = respose
         content['etreeHtml'] = contentHTML
-    return content
+    linkQueue.put(content)
+    #return content
 
 urlLinkHtmlContent = []
+allUrlHtmlSource = []
+
+##这里准备搞起多进程,我记得,印象比较深的,用进程池的多进程!!!.
+##嗯,改装.
+multiPool = Pool(20)
+comboxUrlInfo = Manager().Queue()
 for x in info:
-    x1 = analyseUrlLinks(x['urlLink'])
-    urlLinkHtmlContent.append(x1['etreeHtml'])
+    multiPool.apply_async(func=analyseUrlLinks,args=(x['urlLink'],comboxUrlInfo,))
+multiPool.close()
+multiPool.join()
+
+for x in range(comboxUrlInfo.qsize()):
+    x1 = comboxUrlInfo.get()
+    urlLinkHtmlContent.append(x1['htmlSource'])
+    allUrlHtmlSource.append(x1['etreeHtml'])
     
     
 ###########second-part##############################
