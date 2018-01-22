@@ -85,6 +85,7 @@ info = analyseJobsInfoByHtml(searchInfo)
 
 
 
+
 #def saveHtmlResposeContent(htmlRespose):
     ##return 
 def saveHtmlSource(htmlSource):
@@ -94,31 +95,33 @@ def saveHtmlSource(htmlSource):
 def analyseUrlLinks(linksList,linkQueue):
     content = {}
     for x in linksList:
-        respose = requests.get(x).content.decode("utf-8")
+        resposeCode = requests.get(x)
+        respose = resposeCode.content.decode("utf-8")
         contentHTML = etree.HTML(respose)
         content1 = contentHTML.xpath("//title")
         print(content1[0].text)
         content['htmlSource'] = respose
-        content['etreeHtml'] = contentHTML
     linkQueue.put(content)
-    #return content
 
 urlLinkHtmlContent = []
 allUrlHtmlSource = []
 
 ##这里准备搞起多进程,我记得,印象比较深的,用进程池的多进程!!!.
 ##嗯,改装.
-multiPool = Pool(20)
+multiPool = Pool(10)
 comboxUrlInfo = Manager().Queue()
 for x in info:
     multiPool.apply_async(func=analyseUrlLinks,args=(x['urlLink'],comboxUrlInfo,))
 multiPool.close()
 multiPool.join()
 
+print(comboxUrlInfo.qsize())
 for x in range(comboxUrlInfo.qsize()):
     x1 = comboxUrlInfo.get()
-    urlLinkHtmlContent.append(x1['htmlSource'])
-    allUrlHtmlSource.append(x1['etreeHtml'])
+    content = x1['htmlSource']
+    response = etree.HTML(content)
+    allUrlHtmlSource.append(content)
+    urlLinkHtmlContent.append(response)
     
     
 ###########second-part##############################
