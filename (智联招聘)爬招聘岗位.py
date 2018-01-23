@@ -186,3 +186,19 @@ for x in jobsResList:
     #print("文件夹的名字是:%s")
     
     
+#============================================================
+#============================================================
+fileHtml = []
+for x in jobsResList[0]['jobs']:
+    filePath = x['filePath']
+    print(filePath)
+    with open(filePath,'rb') as file1:
+        fileHtml.append(pickle.load(file1))
+
+print(len(fileHtml))
+for x in fileHtml:
+    for x1 in x:
+        formatHtml = etree.HTML(x1)
+        title = formatHtml.xpath("//title/text()")
+        print(title)
+    print("\n\n")
