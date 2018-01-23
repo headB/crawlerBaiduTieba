@@ -7,6 +7,8 @@ import json
 from lxml import  etree
 import pickle
 from multiprocessing import Pool,Manager
+import time
+import os
 
 ##OK !!尝试直接用requests捉取首页.
 def getSiteIndex():
@@ -46,6 +48,34 @@ if suggestWord:
 ##这个上面部分是普通的函数,然后下面这些是比较重要功能的函数
 #===========================================================================
 #===========================================================================
+#def saveHtmlResposeContent(htmlRespose):
+    ##return 
+
+#使用requests获取的这个函数需要改装一下,
+def analyseUrlLinks(linksList,linkQueue):
+    content = {}
+    for x in linksList:
+        resposeCode = requests.get(x)
+        respose = resposeCode.content.decode("utf-8")
+        contentHTML = etree.HTML(respose)
+        content1 = contentHTML.xpath("//title")
+        print(content1[0].text)
+        content['htmlSource'] = respose
+    linkQueue.put(content)
+
+def getSearchJob(jobName):
+    inputWord = jobName
+    word = urllib.parse.quote(inputWord)
+    url = "http://sou.zhaopin.com/jobs/searchresult.ashx?jl=&kw=%s"%word
+    print(url)
+    response = requests.get(url,headers=UA)
+    return response.content.decode("utf-8")
+
+def analyseJobsByUrls(urls):
+    for x in urls:
+        pass
+
+
     ##定义一个函数,分析出每一个搜索出的职位的相应URL.
 def analyseJobsInfoByHtml(infoArray):
     html = etree.HTML(infoArray)
@@ -64,14 +94,24 @@ def analyseJobsInfoByHtml(infoArray):
     return links
 
 ##定义一个序列化的函数,用于保存刚刚捉取网页的信息,以便下次可以使用.
-def saveFile(htmlSource,fileName):
-    file1 = open('htmlSource/%s'%fileName,'wb')
+def saveFile(htmlSource,dir1,fileName):
+    fileName = dir1+"/"+fileName
+    file1 = open(fileName,'wb')
     pickle.dump(htmlSource,file1)
     file1.close()
+    
     
     #==========================================================================
     #==========================================================================
     #重要的部分函数
+    
+    
+    ##新建文件夹,如果没有的话
+times = time.strftime("%Y%m%d-%H%M%S",time.localtime())
+dir1 = enterKeyWord+"-"+times
+filePath = 'htmlSource/%s'%dir1
+os.mkdir(filePath)
+
 for x in suggestWord['results']:
     keyWord = x['word']
     searchInfo = getSearchJob(keyWord)
@@ -81,7 +121,7 @@ for x in suggestWord['results']:
 
     ##这里准备搞起多进程,我记得,印象比较深的,用进程池的多进程!!!.
     ##嗯,改装.
-    multiPool = Pool(10)
+    multiPool = Pool(20)
     comboxUrlInfo = Manager().Queue()
     for x in info:
         multiPool.apply_async(func=analyseUrlLinks,args=(x['urlLink'],comboxUrlInfo,))
@@ -95,4 +135,9 @@ for x in suggestWord['results']:
         allUrlHtmlSource.append(content)
     ##等待上一级的循环走完了,然后把这里批量搜索到的特定这个职位的信息序列化一下,然后再一次大循环.
     ##可以序列化
-    saveFile(allUrlHtmlSource,keyWord+".pickle")
+    
+   
+    times = time.strftime("%Y%m%d-%H%M%S",time.localtime())
+    saveFile(allUrlHtmlSource,filePath,keyWord+".pickle")
+    
+    
