@@ -141,3 +141,48 @@ for x in suggestWord['results']:
     saveFile(allUrlHtmlSource,filePath,keyWord+".pickle")
     
     
+    #========================添加了一些读取文件夹的函数之类的,其实,这次再次加强了对list和字典的认识
+    #===============想想以前,真的,感觉有dict为什么还需要存在list呢,
+resourceDirName = 'htmlSource'
+pathInfo = os.walk(resourceDirName)
+dirsname = next(pathInfo)
+
+
+dirsInfo = {}
+dirspaths = []
+for x in pathInfo:
+    x1 = x
+    dirspaths.append(x1[0])
+    dirsInfo.update({x1[0]:x1[2]})
+
+jobsResList = []
+
+for x in dirspaths:
+    name = re.search(".+-2018.+",x)
+    if 'group' in dir(name):
+        dirname = name.group()
+        print(dirname)
+        tmpjobList = {'dirname':dirname}
+        tmpjobList.update({'jobs':[]})
+        for x1 in dirsInfo[dirname]:
+            tmpDict1 = {}
+            filePath = dirname+'/'+x1
+            jobTypeName = re.search(".+\.",x1)
+            tmpDict1['jobTypeName'] = jobTypeName.group().strip(".")
+            tmpDict1['filePath'] = filePath
+            tmpjobList['jobs'].append(tmpDict1)
+            tmpDict1 = ''
+        jobsResList.append(tmpjobList)
+
+
+print(len(jobsResList))
+#print(jobsResList)
+for x in jobsResList:
+    print("文件夹是:%s"%x['dirname'])
+    for x1 in x['jobs']:
+        print(x1['jobTypeName'],end='===============')
+        print(x1['filePath'])
+        #print("")
+    #print("文件夹的名字是:%s")
+    
+    
