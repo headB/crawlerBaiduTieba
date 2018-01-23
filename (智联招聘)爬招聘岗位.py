@@ -42,24 +42,11 @@ if suggestWord:
         print(x['word'])
 
 
-#def
-
-def getSearchJob():
-    while True:
-        inputWord = input('请输入你想搜索的职业职')
-        if inputWord:
-            break
-    word = urllib.parse.quote(inputWord)
-    url = "http://sou.zhaopin.com/jobs/searchresult.ashx?jl=&kw=%s"%word
-    print(url)
-    response = requests.get(url,headers=UA)
-    return response.content.decode("utf-8")
-
-def analyseJobsByUrls(urls):
-    for x in urls:
-        pass
-
-
+#===========================================================================
+##这个上面部分是普通的函数,然后下面这些是比较重要功能的函数
+#===========================================================================
+#===========================================================================
+    ##定义一个函数,分析出每一个搜索出的职位的相应URL.
 def analyseJobsInfoByHtml(infoArray):
     html = etree.HTML(infoArray)
     info = html.xpath("//div[@id='newlist_list_content_table']")
@@ -75,101 +62,37 @@ def analyseJobsInfoByHtml(infoArray):
         print(x2)
         links.append(linksDict)
     return links
-    
-searchInfo = getSearchJob()
 
-info = analyseJobsInfoByHtml(searchInfo)
-
-#===========================================================+
-#===========================================================
-
-
-
-
-#def saveHtmlResposeContent(htmlRespose):
-    ##return 
-def saveHtmlSource(htmlSource):
-    pass
-
-#使用requests获取的这个函数需要改装一下,
-def analyseUrlLinks(linksList,linkQueue):
-    content = {}
-    for x in linksList:
-        resposeCode = requests.get(x)
-        respose = resposeCode.content.decode("utf-8")
-        contentHTML = etree.HTML(respose)
-        content1 = contentHTML.xpath("//title")
-        print(content1[0].text)
-        content['htmlSource'] = respose
-    linkQueue.put(content)
-
-urlLinkHtmlContent = []
-allUrlHtmlSource = []
-
-##这里准备搞起多进程,我记得,印象比较深的,用进程池的多进程!!!.
-##嗯,改装.
-multiPool = Pool(10)
-comboxUrlInfo = Manager().Queue()
-for x in info:
-    multiPool.apply_async(func=analyseUrlLinks,args=(x['urlLink'],comboxUrlInfo,))
-multiPool.close()
-multiPool.join()
-
-print(comboxUrlInfo.qsize())
-for x in range(comboxUrlInfo.qsize()):
-    x1 = comboxUrlInfo.get()
-    content = x1['htmlSource']
-    response = etree.HTML(content)
-    allUrlHtmlSource.append(content)
-    urlLinkHtmlContent.append(response)
-    
-    
-###########second-part##############################
-allJobsInfoList = []
-
-def replaceSpecially(x2):
-    x2 = re.sub(r"<.+>",'',x2)
-    x2 = re.sub(r" ",'',x2)
-    x2 = re.sub(r"\r\n",'',x2)
-    return x2
-    
-for x in urlLinkHtmlContent:
-    jobsInfo = {}
-    x1 = x.xpath("//div[@class='terminalpage-left']/ul[@class='terminal-ul clearfix']")
-    x1_1 = x.xpath("//div[@class='terminalpage-main clearfix']//div[@class='tab-inner-cont']")
-    x2 = x1_1[0].xpath("string(.)")
-    x3 = x1_1[1].xpath("string(.)")
-    x2 = replaceSpecially(x2)
-    x3 = replaceSpecially(x3)
-    jobsName = x.xpath("//title/text()")
-    jobsDesc = x1[0].xpath("string(.)")
-    #print(jobsName[0])
-    #print(x2)
-    #print("")
-    #print(x3)
-    jobsInfo.update({'jobName':jobsName[0]})
-    jobsInfo.update({'jobDesc':jobsDesc})
-    jobsInfo.update({'jobDetail':x2})
-    jobsInfo.update({'companyDesc':x3})
-    #print(jobsDesc)
-    allJobsInfoList.append(jobsInfo)
-    
-print(allJobsInfoList)
- 
-##============== the three part=================================
 ##定义一个序列化的函数,用于保存刚刚捉取网页的信息,以便下次可以使用.
-def saveFile(htmlSource):
-    file1 = open('htmlSource/jobs.text','wb')
+def saveFile(htmlSource,fileName):
+    file1 = open('htmlSource/%s'%fileName,'wb')
     pickle.dump(htmlSource,file1)
+    file1.close()
+    
+    #==========================================================================
+    #==========================================================================
+    #重要的部分函数
+for x in suggestWord['results']:
+    keyWord = x['word']
+    searchInfo = getSearchJob(keyWord)
+    info = analyseJobsInfoByHtml(searchInfo)
+    urlLinkHtmlContent = []
+    allUrlHtmlSource = []
 
+    ##这里准备搞起多进程,我记得,印象比较深的,用进程池的多进程!!!.
+    ##嗯,改装.
+    multiPool = Pool(10)
+    comboxUrlInfo = Manager().Queue()
+    for x in info:
+        multiPool.apply_async(func=analyseUrlLinks,args=(x['urlLink'],comboxUrlInfo,))
+    multiPool.close()
+    multiPool.join()
 
-#saveFile(allUrlHtmlSource)
-print(type(allUrlHtmlSource))
-
-##上面定义的是pickle模块的,下面尝试一下用json序列号.
-#def saveFileToJson(htmlSource):
-#    fileJson = json.dumps(allUrlHtmlSource)
-#    with open('htmlSource/jobs.json','w') as file1:
-#        file1.write(fileJson)
-        
-#saveFileToJson(allUrlHtmlSource)
+    print(comboxUrlInfo.qsize())
+    for x in range(comboxUrlInfo.qsize()):
+        x1 = comboxUrlInfo.get()
+        content = x1['htmlSource']
+        allUrlHtmlSource.append(content)
+    ##等待上一级的循环走完了,然后把这里批量搜索到的特定这个职位的信息序列化一下,然后再一次大循环.
+    ##可以序列化
+    saveFile(allUrlHtmlSource,keyWord+".pickle")
