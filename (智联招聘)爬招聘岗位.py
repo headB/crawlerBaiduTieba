@@ -56,8 +56,6 @@ if suggestWord:
 #使用requests获取的这个函数需要改装一下,
 def analyseUrlLinks(linksList,linkQueue,appendLink):
     content = {}
-    #for x in linksList:
-    print(linksList)
     resposeCode = requests.get(linksList)
     respose = resposeCode.content.decode("utf-8")
     contentHTML = etree.HTML(respose)
@@ -74,7 +72,10 @@ def getSearchJob(jobName):
     url = "http://sou.zhaopin.com/jobs/searchresult.ashx?jl=%E9%80%89%E6%8B%A9%E5%9C%B0%E5%8C%BA&kw="+word
     print(url)
     response = requests.get(url,headers=UA)
-    return response.content.decode("utf-8")
+    
+    responseHtml = response.content.decode("utf-8")
+    ##这里开始做文章
+    return responseHtml
     
     
 def analyseJobsByUrls(urls):
@@ -88,6 +89,7 @@ def analyseJobsInfoByHtml(infoArray):
     x2 = etree.HTML(infoArray)
     x3 = x2.xpath("//div[@id='newlist_list_content_table']/table")
     returnContent = []
+    
     for x4 in x3:
         content = {}
         x5 = x4.xpath("tr/td")
@@ -106,9 +108,28 @@ def saveFile(htmlSource,dir1,fileName):
     file1 = open(fileName,'wb')
     pickle.dump(htmlSource,file1)
     file1.close()
+    
+def checkPager(htmlSource):
+    response = etree.HTML(htmlSource)
+    pagerNum = response.xpath("//span[@class='search_yx_tj']/em/text()")
+    pagerNum = pagerNum[0]
+    print(pagerNum)
+    if int(pagerNum) > 60:
+        if int(pagerNum)%60:
+            pagerNum = int(pagerNum)//60 + 1
+        else:
+            pagerNum = int(pagerNum)/60
+    print("可以分成这么多页:----====>>"+str(pagerNum))
+    
+    if int(pagerNum) > 90:
+        print("已经超过范围了,强制调整为90页")
+        pagerNum = 90
+    return int(pagerNum)
+
+    
    
-   #==========================================================================
-    #==========================================================================
+#==========================================================================
+#==========================================================================
     #重要的部分函数
     
     
@@ -118,9 +139,16 @@ dir1 = enterKeyWord+"-"+times
 filePath = 'htmlSource/%s'%dir1
 os.mkdir(filePath)
 
+def printX():
+    print("")
+
+##必须在这里做文章,就看看如何做!!
 for x in suggestWord['results']:
     keyWord = x['word']
     searchInfo = getSearchJob(keyWord)
+    
+    ##真的是给自己才对了,就是在这里可以做文章,哎呀,还是IDE好用,必须用IDE.
+    checkPagerInfo = checkPager(searchInfo)
     info = analyseJobsInfoByHtml(searchInfo)
     urlLinkHtmlContent = []
     allUrlHtmlSource = []
@@ -130,7 +158,12 @@ for x in suggestWord['results']:
     multiPool = Pool(20)
     comboxUrlInfo = Manager().Queue()
     for x in info:
+        ##估计这个位置,加多一个判断,看看是不是需要多一层的循环去捉取数据!!
+        ##加多一个判断.
         multiPool.apply_async(func=analyseUrlLinks,args=(x['urlLink'],comboxUrlInfo,x))
+        #multiPool.apply_async(func=printX)
+        ##上面设置多个循环
+        
     multiPool.close()
     multiPool.join()
 
