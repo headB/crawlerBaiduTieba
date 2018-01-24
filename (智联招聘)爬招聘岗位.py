@@ -50,48 +50,55 @@ if suggestWord:
 #===========================================================================
 #def saveHtmlResposeContent(htmlRespose):
     ##return 
+##添加一个用于解析栏目里面提及到的月薪,地点等等的信息.
 
+    
 #使用requests获取的这个函数需要改装一下,
-def analyseUrlLinks(linksList,linkQueue):
+def analyseUrlLinks(linksList,linkQueue,appendLink):
     content = {}
-    for x in linksList:
-        resposeCode = requests.get(x)
-        respose = resposeCode.content.decode("utf-8")
-        contentHTML = etree.HTML(respose)
-        content1 = contentHTML.xpath("//title")
-        print(content1[0].text)
-        content['htmlSource'] = respose
-    linkQueue.put(content)
+    #for x in linksList:
+    print(linksList)
+    resposeCode = requests.get(linksList)
+    respose = resposeCode.content.decode("utf-8")
+    contentHTML = etree.HTML(respose)
+    content1 = contentHTML.xpath("//title")
+    #print(content1[0].text)
+    #respose = respose+appendContent
+    content['htmlSource'] = respose
+    appendLink.update(content)
+    linkQueue.put(appendLink)
 
 def getSearchJob(jobName):
     inputWord = jobName
     word = urllib.parse.quote(inputWord)
-    url = "http://sou.zhaopin.com/jobs/searchresult.ashx?jl=&kw=%s"%word
+    url = "http://sou.zhaopin.com/jobs/searchresult.ashx?jl=%E9%80%89%E6%8B%A9%E5%9C%B0%E5%8C%BA&kw="+word
     print(url)
     response = requests.get(url,headers=UA)
     return response.content.decode("utf-8")
-
+    
+    
 def analyseJobsByUrls(urls):
     for x in urls:
         pass
 
 
     ##定义一个函数,分析出每一个搜索出的职位的相应URL.
+    ##添加一个用于解析栏目里面提及到的月薪,地点等等的信息.
 def analyseJobsInfoByHtml(infoArray):
-    html = etree.HTML(infoArray)
-    info = html.xpath("//div[@id='newlist_list_content_table']")
-    urlInfo = info[0].xpath("table/tr/td/div/a")
-    links = []
-    for x in urlInfo:
-        linksDict = {}
-        x1 = x.xpath("string(.)")
-        print(x1,end='')
-        linksDict.update({'jobName':x1})
-        x2 = x.xpath("@href")
-        linksDict.update({'urlLink':x2})
-        print(x2)
-        links.append(linksDict)
-    return links
+    x2 = etree.HTML(infoArray)
+    x3 = x2.xpath("//div[@id='newlist_list_content_table']/table")
+    returnContent = []
+    for x4 in x3:
+        content = {}
+        x5 = x4.xpath("tr/td")
+        if x5:
+            content['urlLink'] = x5[0].xpath('div/a/@href')[0]
+            content['jobName'] =  x5[0].xpath("string(.)").replace(" ",'').replace("\r\n",'')
+            content['salary'] = x5[3].text
+            content['location'] = x5[4].text
+        if content:
+            returnContent.append(content)
+    return (returnContent)
 
 ##定义一个序列化的函数,用于保存刚刚捉取网页的信息,以便下次可以使用.
 def saveFile(htmlSource,dir1,fileName):
@@ -99,9 +106,8 @@ def saveFile(htmlSource,dir1,fileName):
     file1 = open(fileName,'wb')
     pickle.dump(htmlSource,file1)
     file1.close()
-    
-    
-    #==========================================================================
+   
+   #==========================================================================
     #==========================================================================
     #重要的部分函数
     
@@ -124,14 +130,15 @@ for x in suggestWord['results']:
     multiPool = Pool(20)
     comboxUrlInfo = Manager().Queue()
     for x in info:
-        multiPool.apply_async(func=analyseUrlLinks,args=(x['urlLink'],comboxUrlInfo,))
+        multiPool.apply_async(func=analyseUrlLinks,args=(x['urlLink'],comboxUrlInfo,x))
     multiPool.close()
     multiPool.join()
 
     print(comboxUrlInfo.qsize())
     for x in range(comboxUrlInfo.qsize()):
         x1 = comboxUrlInfo.get()
-        content = x1['htmlSource']
+        #content = x1['htmlSource']
+        content = x1
         allUrlHtmlSource.append(content)
     ##等待上一级的循环走完了,然后把这里批量搜索到的特定这个职位的信息序列化一下,然后再一次大循环.
     ##可以序列化
@@ -192,14 +199,9 @@ for x in dirspaths:
         jobsResList.append(tmpjobList)
 
 
-print(len(jobsResList))
-
-x1 = (jobsResList[0]['jobs'][0]['filePath'])
-x2 = readPickle(x1)
-format1 = formatHtmlSource(x2[0])
-readJobsRequire(format1)
-
-
+        
+        
+        
 for x in jobsResList:
     print("文件夹是:%s"%x['dirname'])
     for x1 in x['jobs']:
@@ -209,19 +211,12 @@ for x in jobsResList:
         htmlSource = readPickle(x1['filePath'])
         print("这个职位一共有%s个"%(len(htmlSource)))
         for x in htmlSource:
-            formatHtmlStr = formatHtmlSource(x)
-            print(readTitleByPickle(formatHtmlStr))
-            print("")
-            print(readJobsRequire(formatHtmlStr))
-            print("")
-            print("==========================================")
-        
+            #formatHtmlStr = formatHtmlSource(x['htmlSource'])
+            #print(readTitleByPickle(formatHtmlStr),end='  ')
+            print("工资:%s,        工作地点:%s,        职位:%s"%(x['salary'],x['location'],x['jobName']))
         print("\n")
-    print("")
-    #print("文件夹的名字是:%s")
     
 
-    
     
 #============================================================
 #============================================================
