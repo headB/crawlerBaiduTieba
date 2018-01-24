@@ -147,6 +147,24 @@ resourceDirName = 'htmlSource'
 pathInfo = os.walk(resourceDirName)
 dirsname = next(pathInfo)
 
+def formatHtmlSource(htmlSource):
+    return etree.HTML(htmlSource)
+
+def readPickle(filePath):
+    with open(filePath,'rb') as file1:
+        return pickle.load(file1)
+    
+def readTitleByPickle(formatHtml):
+    title = formatHtml.xpath("//title/text()")
+    return title
+
+def readJobsRequire(formatHtml):
+    jobSkill = formatHtml.xpath("//div[@class='terminalpage-main clearfix']/div[@class='tab-cont-box']/div[@class='tab-inner-cont']")
+    if jobSkill:
+        x1 =  jobSkill[0].xpath('string(.)')
+        x1 = x1.replace('\r\n','')
+        x1 = x1.replace(" ",'')
+        return x1
 
 dirsInfo = {}
 dirspaths = []
@@ -161,7 +179,6 @@ for x in dirspaths:
     name = re.search(".+-2018.+",x)
     if 'group' in dir(name):
         dirname = name.group()
-        print(dirname)
         tmpjobList = {'dirname':dirname}
         tmpjobList.update({'jobs':[]})
         for x1 in dirsInfo[dirname]:
@@ -176,14 +193,34 @@ for x in dirspaths:
 
 
 print(len(jobsResList))
-#print(jobsResList)
+
+x1 = (jobsResList[0]['jobs'][0]['filePath'])
+x2 = readPickle(x1)
+format1 = formatHtmlSource(x2[0])
+readJobsRequire(format1)
+
+
 for x in jobsResList:
     print("文件夹是:%s"%x['dirname'])
     for x1 in x['jobs']:
         print(x1['jobTypeName'],end='===============')
         print(x1['filePath'])
-        #print("")
+        print("↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓")
+        htmlSource = readPickle(x1['filePath'])
+        print("这个职位一共有%s个"%(len(htmlSource)))
+        for x in htmlSource:
+            formatHtmlStr = formatHtmlSource(x)
+            print(readTitleByPickle(formatHtmlStr))
+            print("")
+            print(readJobsRequire(formatHtmlStr))
+            print("")
+            print("==========================================")
+        
+        print("\n")
+    print("")
     #print("文件夹的名字是:%s")
+    
+
     
     
 #============================================================
