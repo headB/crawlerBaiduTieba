@@ -52,10 +52,13 @@ if suggestWord:
     ##return 
 ##添加一个用于解析栏目里面提及到的月薪,地点等等的信息.
 
+
+
     
 #使用requests获取的这个函数需要改装一下,
 def analyseUrlLinks(linksList,linkQueue,appendLink):
     content = {}
+    #print(linksList)
     resposeCode = requests.get(linksList)
     respose = resposeCode.content.decode("utf-8")
     contentHTML = etree.HTML(respose)
@@ -66,10 +69,16 @@ def analyseUrlLinks(linksList,linkQueue,appendLink):
     appendLink.update(content)
     linkQueue.put(appendLink)
 
-def getSearchJob(jobName):
+    
+    ##对,就是这里,可以添加其他分页的地方,这样吧,分页器检测到分页之后就再循环一下这里吧,就这样.!!
+def getSearchJob(jobName,pageNum=0):
     inputWord = jobName
     word = urllib.parse.quote(inputWord)
-    url = "http://sou.zhaopin.com/jobs/searchresult.ashx?jl=%E9%80%89%E6%8B%A9%E5%9C%B0%E5%8C%BA&kw="+word
+    if pageNum:
+        word2 = "&p="+str(pageNum)
+    else:
+        word2 = ''
+    url = "http://sou.zhaopin.com/jobs/searchresult.ashx?jl=%E9%80%89%E6%8B%A9%E5%9C%B0%E5%8C%BA&kw="+word+word2
     print(url)
     response = requests.get(url,headers=UA)
     
@@ -77,11 +86,6 @@ def getSearchJob(jobName):
     ##这里开始做文章
     return responseHtml
     
-    
-def analyseJobsByUrls(urls):
-    for x in urls:
-        pass
-
 
     ##定义一个函数,分析出每一个搜索出的职位的相应URL.
     ##添加一个用于解析栏目里面提及到的月薪,地点等等的信息.
@@ -124,10 +128,11 @@ def checkPager(htmlSource):
     if int(pagerNum) > 90:
         print("已经超过范围了,强制调整为90页")
         pagerNum = 90
-    return int(pagerNum)
+        return int(pagerNum)
+    else:
+        return False
 
     
-   
 #==========================================================================
 #==========================================================================
     #重要的部分函数
@@ -143,13 +148,21 @@ def printX():
     print("")
 
 ##必须在这里做文章,就看看如何做!!
+
+if True:
+    wordYouType = input("请输入刚刚上面有建议你输入的职位名称:")
+    if wordYouType:
+        break
+suggestWord = {}
+suggestWord['results'] = [{'word':wordYouType},]
+
 for x in suggestWord['results']:
     keyWord = x['word']
     searchInfo = getSearchJob(keyWord)
     
     ##真的是给自己才对了,就是在这里可以做文章,哎呀,还是IDE好用,必须用IDE.
     checkPagerInfo = checkPager(searchInfo)
-    info = analyseJobsInfoByHtml(searchInfo)
+    info = analyseJobsInfoByHtml(searchInfo)  #######################!!!!!!!!!!!!!!!!!!!这个函数是重点.!!
     urlLinkHtmlContent = []
     allUrlHtmlSource = []
 
@@ -157,13 +170,32 @@ for x in suggestWord['results']:
     ##嗯,改装.
     multiPool = Pool(20)
     comboxUrlInfo = Manager().Queue()
+    
+
     for x in info:
         ##估计这个位置,加多一个判断,看看是不是需要多一层的循环去捉取数据!!
         ##加多一个判断.
+
+
+        ##比如是现在是第一页,然后就扒60行里面的单独URL去下载单独的职位要求,但是不是最重要的!!!.
         multiPool.apply_async(func=analyseUrlLinks,args=(x['urlLink'],comboxUrlInfo,x))
         #multiPool.apply_async(func=printX)
         ##上面设置多个循环
-        
+    
+    multiPool.close()
+    multiPool.join()
+    
+    ##你以为这么快就结束,不不,还得继续用分页器继续检测一下,为真就继续循环.
+    multiPool = Pool(20)
+    comboxUrlInfo = Manager().Queue()
+    
+    if checkPagerInfo:
+        for pageX in range(2,checkPagerInfo):
+            pageXInfo = getSearchJob(keyWord,pageX)
+            info1 = analyseJobsInfoByHtml(pageXInfo)
+            for pageX2 in info1:
+                multiPool.apply_async(func=analyseUrlLinks,args=(pageX2['urlLink'],comboxUrlInfo,pageX2,))
+    
     multiPool.close()
     multiPool.join()
 
@@ -175,11 +207,10 @@ for x in suggestWord['results']:
         allUrlHtmlSource.append(content)
     ##等待上一级的循环走完了,然后把这里批量搜索到的特定这个职位的信息序列化一下,然后再一次大循环.
     ##可以序列化
-    
-   
+
+
     times = time.strftime("%Y%m%d-%H%M%S",time.localtime())
     saveFile(allUrlHtmlSource,filePath,keyWord+".pickle")
-    
     
     #========================添加了一些读取文件夹的函数之类的,其实,这次再次加强了对list和字典的认识
     #===============想想以前,真的,感觉有dict为什么还需要存在list呢,
