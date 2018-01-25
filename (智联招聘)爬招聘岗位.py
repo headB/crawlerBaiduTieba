@@ -236,7 +236,14 @@ def readJobsRequire(formatHtml):
         x1 = x1.replace('\r\n','')
         x1 = x1.replace(" ",'')
         return x1
-
+def getJobsBaseRequire(formatHtml):
+    jobLi = formatHtml.xpath("//div[@class='terminalpage-left']/ul[@class='terminal-ul clearfix']/li")
+    #print(len(jobLi))
+    jobLiList = {}
+    if jobLi:
+        jobLiList['xueli'] = jobLi[5].xpath("string(.)")
+        jobLiList['jobNameDetail'] = jobLi[7].xpath("string(.)")
+    return jobLiList
 dirsInfo = {}
 dirspaths = []
 for x in pathInfo:
@@ -274,11 +281,19 @@ for x in jobsResList:
         print("↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓")
         htmlSource = readPickle(x1['filePath'])
         print("这个职位一共有%s个"%(len(htmlSource)))
+        i1 = 0
         for x in htmlSource:
             #formatHtmlStr = formatHtmlSource(x['htmlSource'])
             #print(readTitleByPickle(formatHtmlStr),end='  ')
             print("工资:%s,        工作地点:%s,        职位:%s"%(x['salary'],x['location'],x['jobName']))
+            #print(len(x['htmlSource']))
+            print(x['urlLink'])
+            requires = getJobsBaseRequire(etree.HTML(x['htmlSource']))
+            
+            print(requires)
+            i1+=1
         print("\n")
+        print("这里是手动统计有多少个职位的程序:"+str(i1))
     
 
     
