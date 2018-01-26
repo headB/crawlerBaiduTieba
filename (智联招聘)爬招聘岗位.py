@@ -313,3 +313,5 @@ for x in fileHtml:
         title = formatHtml.xpath("//title/text()")
         print(title)
     print("\n\n")
+    
+    #
