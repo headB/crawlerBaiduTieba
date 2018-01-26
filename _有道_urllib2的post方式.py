@@ -1,3 +1,4 @@
+#!-*- coding:utf-8 -*-
 import urllib,urllib2
 from lxml import etree
 from gzip import GzipFile
