@@ -1,7 +1,8 @@
 import pytesseract
 from PIL import Image
 import time
-improt re
+import re
+import requests
 ##动态去捉取老师评价网站的验证码并下载下来保存到本地
 
 #这个是要访问的网站，就是自己设计的网站，哈哈哈哈哈。
