@@ -108,9 +108,12 @@ def startLogin():
 ##然后再另外设置一个功能去分析html原码,提取自己想要的数据.
 startLogin()
 
-htmlSource = open("htmlSource/estimate.html","r").readlines()
-
-responseStr = ''.join(htmlSource)
+htmlSource = open("htmlSource/estimate.html","rb").readlines()
+print(type(htmlSource))
+responseStr = ''
+for x in htmlSource:
+    responseStr += x.decode('utf-8')
+#responseStr = ''.join(htmlSource)
 
 ##哈哈.自动就decode了,但是有个问题,他是怎么知道我是utf-8呢...所以,,,这个还是不太好.
 #print(responseStr)
