@@ -3,6 +3,8 @@ from PIL import Image
 import time
 import re
 import requests
+from selenium import webdriver
+from lxml import etree
 ##动态去捉取老师评价网站的验证码并下载下来保存到本地
 
 #这个是要访问的网站，就是自己设计的网站，哈哈哈哈哈。
@@ -18,7 +20,8 @@ ua = {"User-Agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.
 def getCode(): 
     global formData
     response3 = sessionInfo.get(url)
-    with open('imagesGet.png','w') as file:
+    with open('imagesGet.png','wb') as file:
+        #兼容python3的写法
         file.write(response3.content)
 
     image = Image.open('imagesGet.png')
@@ -42,7 +45,7 @@ def tryLogin():
     response2 = sessionInfo.post(url1,data=formData)
     print(response2.content)
     ##请尽量使用search
-    checkInfo = re.search('成功',response2.content)
+    checkInfo = re.search('成功',response2.text)
     ##暂时使用普通方法是验证是否存在匹配.
     if "group" in dir(checkInfo):
         print("成功登陆页面了.!!!\(≧▽≦)/")
@@ -61,7 +64,7 @@ def tryLogin():
         print(phpId)
         
          
-        driver = webdriver.PhantomJS(executable_path="/home/kumanxuan/phantomjs-2.1.1-linux-x86_64/bin/phantomjs")
+        driver = webdriver.PhantomJS()
         driver.set_window_size(width=1920,height=1080)
         
         response4 = driver.get('http://192.168.113.2/form/image.php')
@@ -71,7 +74,8 @@ def tryLogin():
         
         for x1 in savedCookies:
             print(x1)
-            x1['value'] = phpId.decode("utf-8")
+            #x1['value'] = phpId.decode("utf-8")
+            x1['value'] = phpId
             print(x1)
             driver.add_cookie(x1)
         
@@ -102,7 +106,7 @@ def startLogin():
         tryLogin()
     
 ##然后再另外设置一个功能去分析html原码,提取自己想要的数据.
-#startLogin()
+startLogin()
 
 htmlSource = open("htmlSource/estimate.html","r").readlines()
 
