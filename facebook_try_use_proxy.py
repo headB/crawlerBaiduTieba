@@ -23,7 +23,7 @@ proxy.http_proxy='192.168.7.232:777'
 
 
 ##再导入一下刚刚的代理信息
-webdriver.DesiredCapabilities.PHANTOMJS['phantomjs.page.settings.userAgent'] = 'kumanxuan!'
+webdriver.DesiredCapabilities.PHANTOMJS['phantomjs.page.settings.userAgent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36'
 
 proxy.add_to_capabilities(webdriver.DesiredCapabilities.PHANTOMJS)
 browser = webdriver.PhantomJS()
