@@ -23,7 +23,8 @@ proxy.add_to_capabilities(webdriver.DesiredCapabilities.PHANTOMJS)
 browser.start_session(webdriver.DesiredCapabilities.PHANTOMJS)
 
 browser.set_window_size(width=1920,height=1080)
-browser.get("http://www.president.gov.tw")
+#browser.get("http://www.president.gov.tw")
+browser.get("https://www.facebook.com")
 
 #browser.get("http://www.163.com")
 print(browser.page_source)
