@@ -37,15 +37,15 @@ browser.set_window_size(width=1920,height=1080)
 #browser.delete_all_cookies()
 
 #先获取一次正确的cookie格式先.!
-#browser.get("https://www.facebook.com")
-browser.get("http://y.xmg520.com:82/form/login.php")
+browser.get("https://www.facebook.com")
+#browser.get("http://y.xmg520.com:82/form/login.php")
 
 print(browser.page_source)
 cookieGetInfo = browser.get_cookies()
 ##cookie的具体信息
 
 print(cookieGetInfo)
-
+browser.save_screenshot("fb.png")
 
 
 sys.exit(0)
