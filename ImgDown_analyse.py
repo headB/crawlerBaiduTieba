@@ -2,12 +2,12 @@ import requests
 from lxml import etree
 import re
 
-url = "http://#"
+url = "http://"
 
 #-1.html
 #上面的url格式直接是-1是第一页,-2是第二页,以此类推.!!
 
-url1 = "http://#"
+url1 = "http://"
 
 UA = {"userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36"}
 
@@ -44,6 +44,7 @@ def findImg(formatHtml):
 
 ##分析详情页
 def analyseDetailPage(urlLink):
+	print(urlLink)
 	response1 = requests.get(urlLink, headers=UA, proxies=http_proxy)
 	print(response1)
 	formatHtml1 = etree.HTML(response1.content.decode("gbk"))
@@ -65,16 +66,25 @@ def analyseDetailPage(urlLink):
 
 ##保存图片
 def saveImage(name, urlLink):
-	htmlImg = requests.get(urlLink, headers=UA, proxies=http_proxy)
-	with open("./images/" + name + ".jpg", "wb") as file1:
-		file1.write(htmlImg.content)
-
+	try:
+		htmlImg = requests.get(urlLink, headers=UA, proxies=http_proxy)
+		with open("./images/" + name + ".jpg", "wb") as file1:
+			file1.write(htmlImg.content)
+	except:
+		pass
 
 ##当前页的格式化后代码解析.
 def analyseHtml(formatHtml):
+	# 需要设置特殊区分,就是,按要求自己设置.!
+
+
 	tableS = formatHtml.xpath("//table")
 
-	tbodyS = tableS[4].xpath("tbody")
+	if len(tableS)< 6:
+		tbodyS = tableS[2].xpath("tbody")
+	else:
+		tbodyS = tableS[4].xpath("tbody")
+
 
 	for x in tbodyS:
 		x1 = x.xpath("tr/th/span/a")
@@ -89,6 +99,7 @@ def analyseHtml(formatHtml):
 
 
 def firstTry():
+
 	response = requests.get(url, headers=UA, proxies=http_proxy)
 	##打印一下状态#
 	print(response)
