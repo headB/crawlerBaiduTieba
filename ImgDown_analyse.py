@@ -1,6 +1,8 @@
 import requests
 from lxml import etree
 import re
+import random
+
 
 url = "http://"
 
@@ -11,8 +13,6 @@ url1 = "http://"
 
 UA = {"userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36"}
 
-##这个是代理
-http_proxy = {"http":"192.168.7.232:777","https":'192.168.7.232:777'}
 
 
 ##需要定义一个按自己意愿选择具体那一页pi
@@ -45,6 +45,8 @@ def findImg(formatHtml):
 ##分析详情页
 def analyseDetailPage(urlLink):
 	print(urlLink)
+	http_proxy = randomIpDict()
+
 	response1 = requests.get(urlLink, headers=UA, proxies=http_proxy)
 	print(response1)
 	formatHtml1 = etree.HTML(response1.content.decode("gbk"))
@@ -56,7 +58,7 @@ def analyseDetailPage(urlLink):
 	for x2 in x1:
 		namex = name + str(i1) + ".jpg"
 		print(namex)
-		saveImage(namex, x2)
+		saveImage(namex, x2,http_proxy)
 		i1 += 1
 
 
@@ -65,8 +67,9 @@ def analyseDetailPage(urlLink):
 
 
 ##保存图片
-def saveImage(name, urlLink):
+def saveImage(name, urlLink,http_proxy):
 	try:
+		print(http_proxy)
 		htmlImg = requests.get(urlLink, headers=UA, proxies=http_proxy)
 		with open("./images/" + name + ".jpg", "wb") as file1:
 			file1.write(htmlImg.content)
@@ -96,9 +99,22 @@ def analyseHtml(formatHtml):
 					url2 = url1 + x2.xpath("@href")[0]
 					resposex1 = analyseDetailPage(url2)
 
+##添加新功能,进程池,随机的进程池.!
+def randomIpDict():
 
+	ipDict = {}
+
+	ipList = ['192.168.7.232:777','192.168.113.11:9006']
+
+	ipNum = random.randint(0,len(ipList)-1)
+
+	ipDict['http'] = ipList[ipNum]
+	ipDict['https'] = ipList[ipNum]
+	return ipDict
 
 def firstTry():
+	##这个是代理
+	http_proxy = randomIpDict()
 
 	response = requests.get(url, headers=UA, proxies=http_proxy)
 	##打印一下状态#
