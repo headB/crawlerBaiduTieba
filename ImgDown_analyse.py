@@ -2,6 +2,7 @@ import requests
 from lxml import etree
 import re
 import random
+from multiprocessing import Pool
 
 
 url = "http://"
@@ -55,15 +56,18 @@ def analyseDetailPage(urlLink):
 	x1 = findImg(formatHtml1)
 	print(x1)
 	i1 = 1
+	#multiPool = Pool(4)
 	for x2 in x1:
 		namex = name + str(i1) + ".jpg"
 		print(namex)
+	 	#multiPool.apply_async(func=saveImage,args=(namex,x2,http_proxy,))
 		saveImage(namex, x2,http_proxy)
 		i1 += 1
-
+	#multiPool.close()
+	#multiPool.join()
 
 	# for x2 in x1:
-	#   saveImage()
+	# 	saveImage()
 
 
 ##保存图片
@@ -92,13 +96,16 @@ def analyseHtml(formatHtml):
 	for x in tbodyS:
 		x1 = x.xpath("tr/th/span/a")
 		if x1:
+			multiPool = Pool(2)
 			for x2 in x1:
 				x3 = x2.xpath("text()")[0]
 				if len(x3) > 3:
 					print(x3, end='')
 					url2 = url1 + x2.xpath("@href")[0]
-					resposex1 = analyseDetailPage(url2)
-
+					#resposex1 = analyseDetailPage(url2)
+					multiPool.apply_async(func=analyseDetailPage,args=(url2,))
+			multiPool.close()
+			#multiPool.join()
 ##添加新功能,进程池,随机的进程池.!
 def randomIpDict():
 
@@ -126,4 +133,7 @@ def firstTry():
 
 	#resposex1 = analyseDetailPage("")
 
-firstTry()
+#
+
+if __name__ == "__main__":
+	firstTry()
