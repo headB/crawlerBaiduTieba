@@ -3,6 +3,7 @@ from lxml import etree
 import re
 import random
 from multiprocessing import Pool
+import  time
 
 
 url = "http://"
@@ -49,6 +50,7 @@ def analyseDetailPage(urlLink):
 	http_proxy = randomIpDict()
 
 	response1 = requests.get(urlLink, headers=UA, proxies=http_proxy)
+	print("this is detailPage:",end='')
 	print(response1)
 	formatHtml1 = etree.HTML(response1.content.decode("gbk"))
 	name = formatHtml1.xpath("//div[@class='postmessage defaultpost']")[0].xpath("h2/text()")
@@ -58,7 +60,7 @@ def analyseDetailPage(urlLink):
 	i1 = 1
 	#multiPool = Pool(4)
 	for x2 in x1:
-		namex = name + str(i1) + ".jpg"
+		namex = name + str(i1)
 		print(namex)
 	 	#multiPool.apply_async(func=saveImage,args=(namex,x2,http_proxy,))
 		saveImage(namex, x2,http_proxy)
@@ -74,10 +76,10 @@ def analyseDetailPage(urlLink):
 def saveImage(name, urlLink,http_proxy):
 	try:
 		print(http_proxy)
-		htmlImg = requests.get(urlLink, headers=UA, proxies=http_proxy)
+		htmlImg = requests.get(urlLink, headers=UA, proxies=http_proxy,verify=False)
 		with open("./images/" + name + ".jpg", "wb") as file1:
 			file1.write(htmlImg.content)
-	except:
+	except IOError:
 		pass
 
 ##当前页的格式化后代码解析.
@@ -96,16 +98,16 @@ def analyseHtml(formatHtml):
 	for x in tbodyS:
 		x1 = x.xpath("tr/th/span/a")
 		if x1:
-			multiPool = Pool(2)
+			multiPool = Pool(4)
 			for x2 in x1:
 				x3 = x2.xpath("text()")[0]
 				if len(x3) > 3:
-					print(x3, end='')
+					#print(x3, end='')
 					url2 = url1 + x2.xpath("@href")[0]
 					#resposex1 = analyseDetailPage(url2)
 					multiPool.apply_async(func=analyseDetailPage,args=(url2,))
 			multiPool.close()
-			#multiPool.join()
+			#$multiPool.join()
 ##添加新功能,进程池,随机的进程池.!
 def randomIpDict():
 
@@ -120,17 +122,29 @@ def randomIpDict():
 	return ipDict
 
 def firstTry():
-	##这个是代理
-	http_proxy = randomIpDict()
 
-	response = requests.get(url, headers=UA, proxies=http_proxy)
-	##打印一下状态#
-	print(response)
-	##那里面就是
-	formatHtml = etree.HTML(response.content.decode("gbk"))
+	global url
+	urlBackup = url
+	for x in range(1,11):
 
-	analyseHtml(formatHtml)
+		url = url + str(x) + ".html"
+		print(url)
+		##这个是代理
+		http_proxy = randomIpDict()
 
+		response = requests.get(url, headers=UA, proxies=http_proxy)
+		##打印一下状态#
+		print("this total Page:",end='')
+		print(response)
+		##那里面就是
+		formatHtml = etree.HTML(response.content.decode("gbk"))
+
+
+		analyseHtml(formatHtml)
+
+		url = urlBackup
+
+		time.sleep(15)
 	#resposex1 = analyseDetailPage("")
 
 #
