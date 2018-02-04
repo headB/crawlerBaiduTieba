@@ -1,35 +1,10 @@
-
-
-# coding: utf-8
-
-# In[1]:
-
-
 import redis
 import requests
-
-
-# In[2]:
-
-
 conn = redis.StrictRedis(host="127.0.0.1",port="6379")
-
-
-# In[3]:
-
 
 info = conn.hgetall("useful_proxy")
 
-
-# In[44]:
-
-
 print(type(info))
-
-
-# In[5]:
-
-
 print("下面这些ip是可用的!!")
 list1 = []
 for x in info.keys():
@@ -55,9 +30,6 @@ for x in range(50):
     except Exception as e:
         print(type(e))
         print()
-
-
-# In[ ]:
 
 
 x3 = {"http":"","https":""}
