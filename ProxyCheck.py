@@ -36,3 +36,4 @@ x3 = {"http":"","https":""}
 
 info = requests.get(url="https://www.baidu.com",timeout=1,proxies=x3)
 
+##get ready to show time!!
