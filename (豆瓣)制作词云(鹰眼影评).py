@@ -9,12 +9,6 @@ with open('鹰眼所有评论.json') as file1:
     
 reviewJson = json.loads(reviewContent[0])
 
-for x in reviewJson['content']:
-    print(x)
-    print('\n')
-    print("========================================================")
-    print('\n')
-    
 orginWord = reviewContent[0].encode().decode("unicode-escape")
 
 wordRe = re.compile("<.+?>")
