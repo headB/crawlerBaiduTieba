@@ -3,6 +3,8 @@ from wordcloud import WordCloud,ImageColorGenerator
 import jieba
 from matplotlib import pyplot as plt
 import re
+from PIL import Image
+import numpy as np
 
 with open('鹰眼所有评论.json') as file1:
     reviewContent = file1.readlines()
